@@ -27,6 +27,9 @@ const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'https://theleadchat.onrender.com';
 
+// Support email (for now, all support emails go here)
+const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || 'keoughmick768@gmail.com';
+
 let stripe;
 if (STRIPE_SECRET_KEY) {
     stripe = require('stripe')(STRIPE_SECRET_KEY);
@@ -434,8 +437,9 @@ app.post('/api/auth/forgot-password', async (req, res) => {
             await user.save();
             
             // In production, send email here
-            console.log(`🔐 Password reset token for ${email}: ${resetToken}`);
-            console.log(`Reset link: http://localhost:3000/reset-password.html?token=${resetToken}`);
+            console.log(`🔐 Password reset for ${email}: ${resetToken}`);
+            console.log(`🔗 Reset link: ${FRONTEND_URL}/reset-password.html?token=${resetToken}`);
+            console.log(`📧 Would send to: ${SUPPORT_EMAIL}`);
             
             return res.json({ message: 'If an account exists, a reset link has been sent' });
         } else {
@@ -444,8 +448,9 @@ app.post('/api/auth/forgot-password', async (req, res) => {
                 if (user.email === email) {
                     user.resetToken = resetToken;
                     user.resetTokenExpiry = resetTokenExpiry;
-                    console.log(`🔐 Password reset token for ${email}: ${resetToken}`);
-                    console.log(`Reset link: http://localhost:3000/reset-password.html?token=${resetToken}`);
+                    console.log(`🔐 Password reset for ${email}: ${resetToken}`);
+                    console.log(`🔗 Reset link: ${FRONTEND_URL}/reset-password.html?token=${resetToken}`);
+                    console.log(`📧 Would send to: ${SUPPORT_EMAIL}`);
                     break;
                 }
             }
@@ -509,6 +514,26 @@ app.post('/api/auth/reset-password', async (req, res) => {
 // Get pricing plans
 app.get('/api/pricing', (req, res) => {
     res.json({ plans: PRICING_PLANS });
+});
+
+// Contact/Support form
+app.post('/api/contact', async (req, res) => {
+    const { name, email, subject, message } = req.body;
+    
+    if (!name || !email || !message) {
+        return res.status(400).json({ error: 'Name, email, and message required' });
+    }
+    
+    // Log support request (in production, send actual email)
+    console.log('='.repeat(50));
+    console.log('📧 NEW SUPPORT REQUEST');
+    console.log(`From: ${name} (${email})`);
+    console.log(`Subject: ${subject || 'No subject'}`);
+    console.log(`Message: ${message}`);
+    console.log(`Send to: ${SUPPORT_EMAIL}`);
+    console.log('='.repeat(50));
+    
+    res.json({ message: 'Support request received. We will get back to you soon!' });
 });
 
 // Create checkout session
