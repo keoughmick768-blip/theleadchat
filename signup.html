@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Started | TheLeadChat</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --bg-dark: #0f0f23;
+            --bg-card: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+        
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+        
+        .logo {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+        
+        .logo span { color: white; }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .header h1 {
+            font-size: 1.75rem;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            color: var(--text-muted);
+        }
+        
+        .card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 32px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 14px;
+            background: var(--bg-dark);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            background: var(--primary-dark);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #fca5a5;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 24px;
+            color: var(--text-muted);
+        }
+        
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">MissedCall<span>AI</span></div>
+        
+        <div class="header">
+            <h1>Create Your Account</h1>
+            <p>Start your 14-day free trial</p>
+        </div>
+        
+        <div class="card">
+            <div class="error" id="error"></div>
+            
+            <form id="signupForm">
+                <div class="form-group">
+                    <label>Business Name</label>
+                    <input type="text" id="businessName" placeholder="Your Business Name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" placeholder="you@yourbusiness.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="password" placeholder="Create a password" required minlength="6">
+                </div>
+                
+                <button type="submit" class="btn" id="submitBtn">Create Account</button>
+            </form>
+        </div>
+        
+        <div class="footer">
+            Already have an account? <a href="login.html">Sign in</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('signupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const businessName = document.getElementById('businessName').value;
+            const errorDiv = document.getElementById('error');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating account...';
+            errorDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/auth/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, businessName })
+                });
+                
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.error || 'Signup failed');
+                }
+                
+                // Save token and user data
+                localStorage.setItem('TheLeadChat_token', result.token);
+                localStorage.setItem('TheLeadChat_user', JSON.stringify(result.user));
+                
+                // Redirect to setup (add payment step here later)
+                window.location.href = 'setup.html';
+                
+            } catch (err) {
+                errorDiv.textContent = err.message;
+                errorDiv.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create Account';
+            }
+        });
+    </script>
+</body>
+</html>
+

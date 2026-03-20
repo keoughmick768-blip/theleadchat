@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat - Smart Assistant</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a2e;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .chat-container {
+            width: 100%;
+            max-width: 450px;
+            height: 600px;
+            background: #0f0f23;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .chat-header h2 { font-size: 20px; margin-bottom: 5px; }
+        .chat-header p { font-size: 12px; opacity: 0.9; }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .message {
+            max-width: 85%;
+            padding: 15px 18px;
+            border-radius: 18px;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+        
+        .message.bot {
+            background: #1e3a5f;
+            color: #fff;
+            border-bottom-left-radius: 4px;
+        }
+        
+        .message.user {
+            background: #667eea;
+            color: #fff;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .message.thinking {
+            background: #1e3a5f;
+            color: #888;
+            font-style: italic;
+        }
+        
+        .typing {
+            background: #1e3a5f;
+            padding: 15px 18px;
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+            display: none;
+        }
+        
+        .typing.show { display: block; }
+        
+        .typing span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #667eea;
+            border-radius: 50%;
+            margin: 0 3px;
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+        
+        .typing span:nth-child(1) { animation-delay: 0s; }
+        .typing span:nth-child(2) { animation-delay: 0.2s; }
+        .typing span:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes bounce {
+            0%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-8px); }
+        }
+        
+        .quick-replies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .quick-reply {
+            background: #0d1b2a;
+            color: #64b5f6;
+            border: 1px solid #64b5f6;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .quick-reply:hover {
+            background: #64b5f6;
+            color: #0d1b2a;
+        }
+        
+        .chat-input {
+            padding: 15px 20px;
+            border-top: 1px solid #1e3a5f;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 14px 18px;
+            border: 1px solid #1e3a5f;
+            border-radius: 25px;
+            background: #0f0f23;
+            color: #fff;
+            font-size: 15px;
+            outline: none;
+        }
+        
+        .chat-input input:focus { border-color: #667eea; }
+        
+        .chat-input button {
+            width: 48px;
+            height: 48px;
+            background: #667eea;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .chat-input button:hover { background: #5a6fd6; }
+        .chat-input button svg { width: 20px; height: 20px; fill: white; }
+        
+        .powered-by {
+            text-align: center;
+            padding: 10px;
+            font-size: 11px;
+            color: #666;
+        }
+        
+        .powered-by a { color: #667eea; }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h2 id="bizName">🏠 AI Assistant</h2>
+            <p>Ask me anything!</p>
+        </div>
+        
+        <div class="chat-messages" id="messages">
+            <div class="message bot" id="welcome">
+                Hi there! 👋 I'm your AI assistant. 
+                <br><br>
+                I can answer questions about our business, services, schedule appointments, and more.
+                <br><br>
+                What would you like to know?
+                <div class="quick-replies">
+                    <span class="quick-reply" onclick="sendQuick('What services do you offer?')">Services</span>
+                    <span class="quick-reply" onclick="sendQuick('How can I contact you?')">Contact</span>
+                    <span class="quick-reply" onclick="sendQuick('I want to book an appointment')">Book</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="typing" id="typing">
+            <span></span><span></span><span></span>
+        </div>
+        
+        <div class="chat-input">
+            <input type="text" id="userInput" placeholder="Type your question..." onkeypress="handleKeyPress(event)">
+            <button onclick="sendMessage()">
+                <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            </button>
+        </div>
+        
+        <div class="powered-by">
+            Powered by <a href="#">NineM's AI</a>
+        </div>
+    </div>
+    
+    <script>
+        // Business knowledge - loaded from user config
+        let businessInfo = {
+            name: 'KB Fisher & Co',
+            type: 'Real Estate',
+            website: 'kbfisher.com',
+            phone: '(704) 363-5120',
+            email: 'info@kbfisher.com',
+            locations: 'Lake Norman, Charlotte, Cornelius, Huntersville, Davidson, Denver, Mooresville, Concord',
+            services: 'Buying homes, Selling homes, Relocation, Investment properties, First-time buyers',
+            description: 'Family-owned real estate firm serving Lake Norman and greater Charlotte metro. Known for calm, no-pressure approach and long-term client relationships.'
+        };
+        
+        // Chat history for context
+        let chatHistory = [];
+        
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') sendMessage();
+        }
+        
+        function sendQuick(text) {
+            addMessage(text, 'user');
+            processWithAI(text);
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            if (!text) return;
+            
+            addMessage(text, 'user');
+            input.value = '';
+            processWithAI(text);
+        }
+        
+        function addMessage(text, sender) {
+            const messages = document.getElementById('messages');
+            const div = document.createElement('div');
+            div.className = `message ${sender}`;
+            
+            if (sender === 'bot') {
+                div.innerHTML = text;
+            } else {
+                div.textContent = text;
+            }
+            
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+        }
+        
+        function showTyping() {
+            document.getElementById('typing').classList.add('show');
+            document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+        }
+        
+        function hideTyping() {
+            document.getElementById('typing').classList.remove('show');
+        }
+        
+        // Call MiniMax API for smart responses
+        async function processWithAI(userMessage) {
+            showTyping();
+            
+            // Add to history
+            chatHistory.push({ role: 'user', content: userMessage });
+            
+            try {
+                // Build context for the AI
+                const context = `
+Business Information:
+- Name: ${businessInfo.name}
+- Type: ${businessInfo.type}
+- Phone: ${businessInfo.phone}
+- Email: ${businessInfo.email}
+- Website: ${businessInfo.website}
+- Locations: ${businessInfo.locations}
+- Services: ${businessInfo.services}
+- About: ${businessInfo.description}
+
+Instructions:
+- You are a friendly AI assistant for ${businessInfo.name}
+- Answer questions based on the business information above
+- Be helpful, friendly, and professional
+- Keep responses concise but informative
+- If you don't know something, say you'll pass along the question
+- End with a question to continue the conversation
+`;
+                
+                // Call MiniMax API (simulated for demo - in real app, use actual API)
+                const response = await callMiniMax(context, userMessage, chatHistory);
+                
+                hideTyping();
+                addMessage(response, 'bot');
+                chatHistory.push({ role: 'assistant', content: response });
+                
+            } catch (error) {
+                hideTyping();
+                // Fallback response
+                const fallback = getFallbackResponse(userMessage);
+                addMessage(fallback, 'bot');
+            }
+        }
+        
+        // Simulated MiniMax call - in production, replace with actual API
+        async function callMiniMax(context, userMessage, history) {
+            // For demo, use intelligent fallback
+            // In production: call https://api.minimax.chat/v1/text/chatcompletion_v2
+            
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    const response = generateSmartResponse(userMessage, context);
+                    resolve(response);
+                }, 1500);
+            });
+        }
+        
+        // Smart response generation based on context
+        function generateSmartResponse(question, context) {
+            const q = question.toLowerCase();
+            
+            // Buying
+            if (q.includes('buy') || q.includes('purchas') || q.includes('looking for') || q.includes('home for')) {
+                return `That's exciting! 🏠 I'd love to help you find your perfect home in the ${businessInfo.locations.split(',')[0]} area!
+<br><br>
+<strong>Here's how our buying process works:</strong>
+1️⃣ <strong>Consultation</strong> - We learn about your needs and budget
+2️⃣ <strong>Pre-approval</strong> - We connect you with great lenders
+3️⃣ <strong>Search</strong> - We find homes matching your criteria
+4️⃣ <strong>Tour</strong> - We tour homes together
+5️⃣ <strong>Offer</strong> - We negotiate and get you the best deal
+<br><br>
+Would you like to start? Feel free to tell me about what you're looking for!`;
+            }
+            
+            // Selling
+            if (q.includes('sell')) {
+                return `Great choice! 💰 We help homeowners in ${businessInfo.locations} sell their properties for top dollar.
+<br><br>
+<strong>What we offer:</strong>
+• Free home valuation
+• Professional marketing
+• Expert negotiation
+• Stress-free closing
+<br><br>
+Would you like a free estimate of your home's value? Just tell me about your property!`;
+            }
+            
+            // Contact
+            if (q.includes('contact') || q.includes('phone') || q.includes('call') || q.includes('email') || q.includes('reach')) {
+                return `📞 You can reach us at:
+<br><br>
+• <strong>Phone:</strong> ${businessInfo.phone}
+• <strong>Email:</strong> ${businessInfo.email}
+• <strong>Website:</strong> ${businessInfo.website}
+<br><br>
+Or I can help you schedule a consultation right here!`;
+            }
+            
+            // Areas
+            if (q.includes('area') || q.includes('location') || q.includes('serve') || q.includes('where')) {
+                return `We proudly serve: <strong>${businessInfo.locations}</strong>
+<br><br>
+Is there a specific area you're interested in?`;
+            }
+            
+            // Services
+            if (q.includes('service') || q.includes('what do you')) {
+                return `Our services include:
+<br><br>
+• 🏠 <strong>Buying</strong> - Find your dream home
+• 💰 <strong>Selling</strong> - Get top dollar for your property
+• 📦 <strong>Relocation</strong> - Moving? We can help
+• 💵 <strong>Investment</strong> - Build your portfolio
+• 👶 <strong>First-Time Buyers</strong> - We guide you through every step
+<br><br>
+Which service are you most interested in?`;
+            }
+            
+            // About
+            if (q.includes('about') || q.includes('who') || q.includes('what') || q.includes('experience')) {
+                return `${businessInfo.description}
+<br><br>
+Much of our work comes through referrals - that tells you everything about our commitment to client service! 
+<br><br>
+Would you like to get in touch?`;
+            }
+            
+            // Booking/Appointment
+            if (q.includes('book') || q.includes('schedule') || q.includes('appointment') || q.includes('meeting')) {
+                return `📅 I'd be happy to help you schedule a consultation!
+<br><br>
+We offer:
+• In-person meetings
+• Video calls
+• Phone consultations
+<br><br>
+Would you like me to have an agent reach out to you directly at ${businessInfo.phone}? Or would you prefer to fill out a quick form on our website?`;
+            }
+            
+            // Hours
+            if (q.includes('hour') || q.includes('open') || q.includes('time')) {
+                return `We're here to help! 📅
+<br><br>
+• <strong>Phone:</strong> Mon-Fri, 9AM-6PM
+• <strong>Showings:</strong> 7 days a week (we work when you work!)
+• <strong>Emergency:</strong> We respond quickly to urgent matters
+<br><br>
+What's the best way to reach you?`;
+            }
+            
+            // Pricing/Mortgage
+            if (q.includes('price') || q.includes('cost') || q.includes('mortgage') || q.includes('finance') || q.includes('down payment')) {
+                return `Great question! Every buyer's situation is different.
+<br><br>
+<strong>Factors that affect your purchase power:</strong>
+• Down payment amount (3-20%+)
+• Current mortgage rates
+• Credit score
+• Debt-to-income ratio
+<br><br>
+We work with excellent lenders who offer competitive rates. Would you like me to connect you with one of our trusted mortgage partners for a pre-approval?`;
+            }
+            
+            // Default - use AI-like response
+            return `Thanks for your question! 😊
+<br><br>
+I can help you with:
+• <strong>Buying</strong> a home - ${businessInfo.services.toLowerCase()}
+• <strong>Selling</strong> your current property
+• <strong>Scheduling</strong> a consultation
+• <strong>Answering</strong> any questions about the process
+<br><br>
+Just let me know what you'd like to know more about!`;
+        }
+        
+        function getFallbackResponse(question) {
+            return `Thanks for reaching out! I'd be happy to help.
+<br><br>
+For specific questions about ${businessInfo.name}, I'd recommend:
+• Calling: ${businessInfo.phone}
+• Visiting: ${businessInfo.website}
+• Or I can have an agent contact you directly!
+<br><br>
+What would be most helpful?`;
+        }
+        
+        // Set business name
+        document.getElementById('bizName').textContent = '🏠 ' + businessInfo.name;
+    </script>
+</body>
+</html>
+

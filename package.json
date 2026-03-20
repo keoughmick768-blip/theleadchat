@@ -1,0 +1,30 @@
+{
+  "name": "missedcallai",
+  "version": "1.0.0",
+  "description": "AI Auto Missed Call Reply - Never miss a lead again!",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^17.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^9.3.1",
+    "twilio": "^4.19.0"
+  },
+  "keywords": [
+    "ai",
+    "chatbot",
+    "ollama",
+    "saas",
+    "twilio",
+    "sms"
+  ],
+  "author": "NineM",
+  "license": "MIT"
+}

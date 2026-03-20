@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings | TheLeadChat</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --bg-dark: #0f0f23;
+            --bg-card: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --error: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+        
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        /* Layout */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--bg-card);
+            border-right: 1px solid rgba(255,255,255,0.05);
+            padding: 24px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        
+        .sidebar-logo {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary);
+            padding: 0 24px;
+            margin-bottom: 32px;
+            text-decoration: none;
+        }
+        
+        .sidebar-logo span { color: white; }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 24px;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.2s;
+            gap: 12px;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            color: var(--text);
+            background: rgba(255,255,255,0.05);
+        }
+        
+        .nav-item.active {
+            border-left: 3px solid var(--primary);
+        }
+        
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            opacity: 0.7;
+        }
+        
+        /* Main Content */
+        .main {
+            flex: 1;
+            margin-left: 260px;
+            padding: 32px;
+        }
+        
+        .page-header {
+            margin-bottom: 32px;
+        }
+        
+        .page-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .page-subtitle {
+            color: var(--text-muted);
+        }
+        
+        /* Settings Sections */
+        .settings-section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .section-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        
+        /* Form */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 0;
+        }
+        
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-dark);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+        
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: var(--text);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.15);
+        }
+        
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+        
+        /* Messages */
+        .alert {
+            padding: 14px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #34d399;
+        }
+        
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+        }
+        
+        /* Toggle Switch */
+        .toggle-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .toggle-wrapper:last-child {
+            border-bottom: none;
+        }
+        
+        .toggle-label {
+            font-size: 0.95rem;
+        }
+        
+        .toggle-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        
+        .toggle {
+            position: relative;
+            width: 48px;
+            height: 26px;
+        }
+        
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.1);
+            border-radius: 26px;
+            transition: 0.3s;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+        
+        .toggle input:checked + .toggle-slider {
+            background: var(--primary);
+        }
+        
+        .toggle input:checked + .toggle-slider:before {
+            transform: translateX(22px);
+        }
+        
+        /* Danger Zone */
+        .danger-zone {
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            background: rgba(239, 68, 68, 0.05);
+        }
+        
+        .danger-zone .section-title {
+            color: #f87171;
+        }
+        
+        /* Responsive */
+        @media (max-width: 900px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-group.full-width {
+                grid-column: span 1;
+            }
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 420px;
+            width: 90%;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .modal h3 {
+            margin-bottom: 16px;
+        }
+        
+        .modal p {
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <a href="dashboard.html" class="sidebar-logo">Missed<span>Call</span>AI</a>
+            
+            <a href="dashboard.html" class="nav-item">
+                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                Dashboard
+            </a>
+            <a href="leads.html" class="nav-item">
+                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                Leads
+            </a>
+            <a href="chatbot-preview.html" class="nav-item">
+                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                Chat Widget
+            </a>
+            <a href="setup.html" class="nav-item">
+                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                Setup
+            </a>
+            <a href="settings.html" class="nav-item active">
+                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                Settings
+            </a>
+        </nav>
+        
+        <!-- Main Content -->
+        <main class="main">
+            <div class="page-header">
+                <h1 class="page-title">Settings</h1>
+                <p class="page-subtitle">Manage your account and preferences</p>
+            </div>
+            
+            <div id="alertMsg"></div>
+            
+            <!-- Profile Section -->
+            <div class="settings-section">
+                <div class="section-header">
+                    <div>
+                        <h2 class="section-title">Profile Information</h2>
+                        <p class="section-subtitle">Update your business details</p>
+                    </div>
+                </div>
+                
+                <form id="profileForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Business Name</label>
+                            <input type="text" id="businessName" placeholder="Your Business Name">
+                        </div>
+                        <div class="form-group">
+                            <label>Owner Name</label>
+                            <input type="text" id="ownerName" placeholder="Your Name">
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" id="email" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="tel" id="phone" placeholder="+1 (555) 000-0000">
+                        </div>
+                        <div class="form-group">
+                            <label>Website URL</label>
+                            <input type="url" id="website" placeholder="https://yourwebsite.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Services Offered</label>
+                            <input type="text" id="services" placeholder="e.g., Plumbing, Electrical">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" style="margin-top: 20px;">
+                        Save Changes
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Change Password Section -->
+            <div class="settings-section">
+                <div class="section-header">
+                    <div>
+                        <h2 class="section-title">Change Password</h2>
+                        <p class="section-subtitle">Update your account security</p>
+                    </div>
+                </div>
+                
+                <form id="passwordForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Current Password</label>
+                            <input type="password" id="currentPassword" placeholder="Enter current password">
+                        </div>
+                        <div class="form-group">
+                            <label>New Password</label>
+                            <input type="password" id="newPassword" placeholder="Enter new password">
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Confirm New Password</label>
+                            <input type="password" id="confirmPassword" placeholder="Confirm new password">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" style="margin-top: 20px;">
+                        Update Password
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Notifications Section -->
+            <div class="settings-section">
+                <div class="section-header">
+                    <div>
+                        <h2 class="section-title">Notifications</h2>
+                        <p class="section-subtitle">Configure how you receive updates</p>
+                    </div>
+                </div>
+                
+                <div class="toggle-wrapper">
+                    <div>
+                        <div class="toggle-label">Email Notifications</div>
+                        <div class="toggle-desc">Receive lead notifications via email</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="emailNotif" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="toggle-wrapper">
+                    <div>
+                        <div class="toggle-label">SMS Notifications</div>
+                        <div class="toggle-desc">Receive urgent alerts via text message</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="smsNotif">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="toggle-wrapper">
+                    <div>
+                        <div class="toggle-label">Daily Summary</div>
+                        <div class="toggle-desc">Get a daily recap of your leads and conversations</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="dailySummary" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Support Section -->
+            <div class="settings-section">
+                <div class="section-header">
+                    <div>
+                        <h2 class="section-title">Support & Help</h2>
+                        <p class="section-subtitle">Get help when you need it</p>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                    <a href="mailto:support@TheLeadChat.com" class="btn btn-secondary">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        Email Support
+                    </a>
+                    <a href="#" class="btn btn-secondary">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        FAQ
+                    </a>
+                    <a href="#" class="btn btn-secondary">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                        Tutorial
+                    </a>
+                </div>
+                
+                <div style="margin-top: 24px; padding: 16px; background: rgba(16, 185, 129, 0.1); border-radius: 10px;">
+                    <strong style="color: #34d399;">💡 Pro Tip:</strong> 
+                    <span style="color: var(--text-muted);">Check our YouTube channel for video tutorials on getting the most out of TheLeadChat.</span>
+                </div>
+            </div>
+            
+            <!-- Danger Zone -->
+            <div class="settings-section danger-zone">
+                <div class="section-header">
+                    <div>
+                        <h2 class="section-title">Danger Zone</h2>
+                        <p class="section-subtitle">Irreversible actions - proceed with caution</p>
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                    <div>
+                        <div class="toggle-label">Delete Account</div>
+                        <div class="toggle-desc">Permanently delete your account and all data</div>
+                    </div>
+                    <button class="btn btn-danger" onclick="showDeleteModal()">Delete Account</button>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Delete Account Modal -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal">
+            <h3>Delete Account?</h3>
+            <p>This action cannot be undone. All your data, leads, and settings will be permanently deleted.</p>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+                <button class="btn btn-danger" onclick="deleteAccount()">Yes, Delete</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Check authentication
+        const token = localStorage.getItem('TheLeadChat_token');
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+        
+        // Load user data
+        async function loadUserData() {
+            try {
+                const response = await fetch('/api/user/me', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (response.ok) {
+                    const user = await response.json();
+                    document.getElementById('businessName').value = user.businessName || '';
+                    document.getElementById('ownerName').value = user.ownerName || '';
+                    document.getElementById('email').value = user.email || '';
+                    document.getElementById('phone').value = user.phone || '';
+                    document.getElementById('website').value = user.website || '';
+                    document.getElementById('services').value = user.services || '';
+                }
+            } catch (err) {
+                console.error('Failed to load user:', err);
+            }
+        }
+        
+        loadUserData();
+        
+        // Profile form
+        document.getElementById('profileForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const btn = this.querySelector('button');
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+            
+            try {
+                const response = await fetch('/api/user/profile', {
+                    method: 'PUT',
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        businessName: document.getElementById('businessName').value,
+                        ownerName: document.getElementById('ownerName').value,
+                        phone: document.getElementById('phone').value,
+                        website: document.getElementById('website').value,
+                        services: document.getElementById('services').value
+                    })
+                });
+                
+                if (response.ok) {
+                    showAlert('Profile updated successfully!', 'success');
+                } else {
+                    const data = await response.json();
+                    showAlert(data.error || 'Failed to update profile', 'error');
+                }
+            } catch (err) {
+                showAlert('Failed to update profile', 'error');
+            }
+            
+            btn.disabled = false;
+            btn.textContent = 'Save Changes';
+        });
+        
+        // Password form
+        document.getElementById('passwordForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const current = document.getElementById('currentPassword').value;
+            const newPass = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
+            
+            if (newPass !== confirm) {
+                showAlert('Passwords do not match', 'error');
+                return;
+            }
+            
+            if (newPass.length < 8) {
+                showAlert('Password must be at least 8 characters', 'error');
+                return;
+            }
+            
+            const btn = this.querySelector('button');
+            btn.disabled = true;
+            btn.textContent = 'Updating...';
+            
+            try {
+                const response = await fetch('/api/user/change-password', {
+                    method: 'POST',
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ currentPassword: current, newPassword: newPass })
+                });
+                
+                if (response.ok) {
+                    showAlert('Password updated successfully!', 'success');
+                    document.getElementById('passwordForm').reset();
+                } else {
+                    const data = await response.json();
+                    showAlert(data.error || 'Failed to update password', 'error');
+                }
+            } catch (err) {
+                showAlert('Failed to update password', 'error');
+            }
+            
+            btn.disabled = false;
+            btn.textContent = 'Update Password';
+        });
+        
+        function showAlert(msg, type) {
+            const div = document.getElementById('alertMsg');
+            div.className = `alert alert-${type}`;
+            div.textContent = msg;
+            div.style.display = 'block';
+            
+            setTimeout(() => {
+                div.style.display = 'none';
+            }, 5000);
+        }
+        
+        function showDeleteModal() {
+            document.getElementById('deleteModal').classList.add('active');
+        }
+        
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('active');
+        }
+        
+        async function deleteAccount() {
+            if (!confirm('Are you absolutely sure? This cannot be undone!')) return;
+            
+            try {
+                const response = await fetch('/api/user/delete', {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                localStorage.removeItem('TheLeadChat_token');
+                localStorage.removeItem('TheLeadChat_user');
+                window.location.href = 'index.html';
+            } catch (err) {
+                showAlert('Failed to delete account', 'error');
+            }
+        }
+        
+        // Logout
+        function logout() {
+            localStorage.removeItem('TheLeadChat_token');
+            localStorage.removeItem('TheLeadChat_user');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

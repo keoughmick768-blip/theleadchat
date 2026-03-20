@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Your Chatbot</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: #667eea;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .header h1 { font-size: 24px; }
+        .header p { opacity: 0.9; }
+        
+        .chat-container {
+            flex: 1;
+            max-width: 600px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            min-height: 400px;
+        }
+        
+        .message {
+            max: 80%;
+            padding: 14px 18px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+        
+        .message.bot {
+            background: #f0f0f0;
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+        }
+        
+        .message.user {
+            background: #667eea;
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .chat-input {
+            padding: 15px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 14px 18px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 15px;
+        }
+        
+        .chat-input input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .chat-input button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .chat-input button:hover {
+            background: #5a6fd6;
+        }
+        
+        .info-box {
+            background: #fff3cd;
+            padding: 12px 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🤖 Test Your AI Chatbot</h1>
+        <p>This is what your customers will see on your website</p>
+    </div>
+    
+    <div class="info-box">
+        💡 Tip: Ask questions about your business to see how the AI responds!
+    </div>
+    
+    <div class="chat-container">
+        <div class="chat-messages" id="chat">
+            <div class="message bot">
+                👋 Hi there! Welcome to <strong id="bizName">Your Business</strong>!
+                <br><br>
+                I'm your AI assistant. Ask me anything about our business!
+            </div>
+        </div>
+        
+        <div class="chat-input">
+            <input type="text" id="input" placeholder="Type your question...">
+            <button onclick="send()">Send</button>
+        </div>
+    </div>
+    
+    <script>
+        // Load user info
+        let user = JSON.parse(localStorage.getItem('ninems_current'));
+        
+        if (!user) {
+            document.getElementById('chat').innerHTML = '<p style="text-align:center;color:#666;">Please login first to test your chatbot!</p>';
+        } else {
+            document.getElementById('bizName').textContent = user.businessName || 'Your Business';
+        }
+        
+        function send() {
+            const input = document.getElementById('input');
+            const text = input.value.trim();
+            if (!text) return;
+            
+            // Add user message
+            const chat = document.getElementById('chat');
+            chat.innerHTML += '<div class="message user">' + text + '</div>';
+            input.value = '';
+            chat.scrollTop = chat.scrollHeight;
+            
+            // Simulate AI response
+            setTimeout(() => {
+                let response = "Thanks for your question! ";
+                
+                if (user) {
+                    if (text.toLowerCase().includes('service') || text.toLowerCase().includes('offer')) {
+                        response += "We offer " + (user.services || 'various services') + ".";
+                    } else if (text.toLowerCase().includes('hour') || text.toLowerCase().includes('open')) {
+                        response += "You can check our website for hours or give us a call!";
+                    } else if (text.toLowerCase().includes('contact') || text.toLowerCase().includes('phone') || text.toLowerCase().includes('email')) {
+                        response += "You can reach us at " + (user.phone || 'our phone number') + ".";
+                    } else if (text.toLowerCase().includes('price') || text.toLowerCase().includes('cost')) {
+                        response += "Our pricing varies - contact us for a quote!";
+                    } else if (text.toLowerCase().includes('location') || text.toLowerCase().includes('address') || text.toLowerCase().includes('where')) {
+                        response += "We serve " + (user.areas || 'the local area') + ".";
+                    } else {
+                        response += "Would you like to schedule an appointment or learn more about our services?";
+                    }
+                }
+                
+                response += "<br><br>Is there anything else I can help you with?";
+                
+                chat.innerHTML += '<div class="message bot">' + response + '</div>';
+                chat.scrollTop = chat.scrollHeight;
+            }, 1000);
+        }
+        
+        // Enter key
+        document.getElementById('input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') send();
+        });
+    </script>
+</body>
+</html>
+

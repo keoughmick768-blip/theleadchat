@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Your Chatbot | TheLeadChat</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --bg-dark: #0f0f23;
+            --bg-card: #1e293b;
+            --bg-card-hover: #283548;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+        
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .setup-container {
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .logo h1 {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+        
+        .logo span { color: white; }
+        
+        .card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 32px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .card h2 {
+            margin-bottom: 8px;
+            font-size: 1.5rem;
+        }
+        
+        .card p {
+            color: var(--text-muted);
+            margin-bottom: 32px;
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 14px;
+            background: var(--bg-dark);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .form-group small {
+            display: block;
+            margin-top: 6px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            background: var(--primary-dark);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #fca5a5;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <div class="setup-container">
+        <div class="logo">
+            <h1>MissedCall<span>AI</span></h1>
+        </div>
+        
+        <div class="card">
+            <h2>🚀 Set Up Your Chatbot</h2>
+            <p>Tell us about your business so we can customize your AI assistant.</p>
+            
+            <div class="error" id="error"></div>
+            
+            <form id="setupForm">
+                <div class="form-group">
+                    <label>Business Name *</label>
+                    <input type="text" id="businessName" required placeholder="Your Business Name">
+                </div>
+                
+                <div class="form-group">
+                    <label>Your Name</label>
+                    <input type="text" id="ownerName" placeholder="John Doe">
+                </div>
+                
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" id="phone" placeholder="+1 (555) 123-4567">
+                </div>
+                
+                <div class="form-group">
+                    <label>Website (optional)</label>
+                    <input type="url" id="website" placeholder="https://yourwebsite.com">
+                </div>
+                
+                <div class="form-group">
+                    <label>Services You Offer *</label>
+                    <textarea id="services" required placeholder="e.g., Real estate, Home cleaning, Plumbing..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Areas You Serve *</label>
+                    <input type="text" id="areas" required placeholder="e.g., Charlotte NC, Lake Norman">
+                </div>
+                
+                <div class="form-group">
+                    <label>What Makes You Unique</label>
+                    <textarea id="unique" placeholder="e.g., Family owned, 20+ years experience, Free estimates"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Opening Message</label>
+                    <textarea id="openingMessage" placeholder="Hi! Thanks for reaching out. How can I help you today?"></textarea>
+                    <small>The first message the AI sends when a conversation starts</small>
+                </div>
+                
+                <div class="form-group">
+                    <label>Conversation Goal</label>
+                    <select id="conversationGoal">
+                        <option value="answer_questions">Answer Questions</option>
+                        <option value="book_appointment">Book Appointment</option>
+                        <option value="collect_info">Collect Contact Information</option>
+                        <option value="provide_info">Provide Information Only</option>
+                    </select>
+                    <small>What the AI should aim to achieve in conversations</small>
+                </div>
+                
+                <button type="submit" class="btn" id="submitBtn">Complete Setup</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('TheLeadChat_token');
+        
+        if (!token) {
+            // No token - redirect to login
+            window.location.href = 'login.html';
+        }
+        
+        document.getElementById('setupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const errorDiv = document.getElementById('error');
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Setting up...';
+            errorDiv.style.display = 'none';
+            
+            const data = {
+                businessName: document.getElementById('businessName').value,
+                ownerName: document.getElementById('ownerName').value,
+                phone: document.getElementById('phone').value,
+                website: document.getElementById('website').value,
+                services: document.getElementById('services').value,
+                areas: document.getElementById('areas').value,
+                unique: document.getElementById('unique').value,
+                openingMessage: document.getElementById('openingMessage').value || 'Hi! Thanks for reaching out. How can I help you today?',
+                conversationGoal: document.getElementById('conversationGoal').value
+            };
+            
+            try {
+                const response = await fetch('/api/user/complete-setup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.error || 'Setup failed');
+                }
+                
+                // Save user data locally
+                localStorage.setItem('TheLeadChat_user', JSON.stringify(result.user));
+                
+                // Redirect to dashboard
+                window.location.href = 'dashboard.html';
+                
+            } catch (err) {
+                errorDiv.textContent = err.message;
+                errorDiv.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Complete Setup';
+            }
+        });
+    </script>
+</body>
+</html>
+

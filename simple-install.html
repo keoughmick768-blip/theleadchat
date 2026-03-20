@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Your AI Chatbot - 2 Minutes!</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --success: #10b981;
+            --dark: #0f0f23;
+            --dark2: #1a1a2e;
+            --dark3: #252542;
+            --light: #fff;
+            --gray: #9ca3af;
+            --gray-dark: #6b7280;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--dark);
+            color: var(--light);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 50%, #a855f7 100%);
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        
+        header * { position: relative; }
+        
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        header h1 {
+            font-size: clamp(32px, 5vw, 48px);
+            margin-bottom: 15px;
+            font-weight: 800;
+        }
+        
+        header p {
+            font-size: 18px;
+            opacity: 0.95;
+        }
+        
+        /* Container */
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        /* Steps */
+        .step {
+            background: var(--dark2);
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 25px;
+            border: 1px solid var(--dark3);
+            transition: all 0.3s ease;
+            display: none;
+            animation: slideIn 0.4s ease;
+        }
+        
+        .step.active { display: block; }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            border-radius: 50%;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        
+        .step h2 {
+            font-size: 26px;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+        
+        .step > p {
+            color: var(--gray);
+            font-size: 16px;
+            margin-bottom: 25px;
+        }
+        
+        /* Input */
+        .input-group { margin-bottom: 20px; }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--gray);
+            font-weight: 500;
+        }
+        
+        .big-input {
+            width: 100%;
+            padding: 18px 22px;
+            border: 2px solid var(--dark3);
+            border-radius: 14px;
+            background: var(--dark);
+            color: white;
+            font-size: 17px;
+            transition: all 0.2s ease;
+        }
+        
+        .big-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+        }
+        
+        .big-input::placeholder { color: var(--gray-dark); }
+        
+        /* Buttons */
+        .btn {
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            padding: 16px 36px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--dark3);
+        }
+        
+        .btn-outline:hover {
+            border-color: var(--primary);
+            background: var(--dark3);
+        }
+        
+        .btn-block { width: 100%; justify-content: center; }
+        
+        /* Result */
+        .result-box {
+            background: var(--dark);
+            border-radius: 16px;
+            padding: 30px;
+            margin-top: 25px;
+            display: none;
+            border: 2px solid var(--success);
+            animation: slideIn 0.4s ease;
+        }
+        
+        .result-box.show { display: block; }
+        
+        .success-icon {
+            font-size: 56px;
+            margin-bottom: 15px;
+        }
+        
+        .result-code {
+            background: var(--dark2);
+            padding: 20px;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #4ade80;
+            overflow-x: auto;
+            margin: 15px 0;
+            word-break: break-all;
+        }
+        
+        .copy-btn {
+            background: var(--dark3);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .copy-btn:hover { background: var(--primary); }
+        
+        /* Instructions */
+        .instructions {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 24px;
+            border-radius: 14px;
+            margin-top: 25px;
+        }
+        
+        .instructions h4 {
+            color: var(--primary-light);
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+            color: var(--gray);
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+        }
+        
+        /* Demo */
+        .demo-section {
+            background: var(--dark2);
+            border-radius: 24px;
+            padding: 40px;
+            margin-top: 30px;
+            border: 1px solid var(--dark3);
+        }
+        
+        .demo-section h2 {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+        
+        .demo-section > p {
+            color: var(--gray);
+            margin-bottom: 25px;
+        }
+        
+        .demo-chat {
+            background: var(--dark);
+            border-radius: 16px;
+            padding: 20px;
+            height: 280px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+        
+        .demo-msg {
+            margin-bottom: 16px;
+            padding: 14px 18px;
+            border-radius: 16px;
+            max-width: 82%;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+        
+        .demo-msg.bot {
+            background: var(--dark2);
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+        }
+        
+        .demo-msg.user {
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .demo-input {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .demo-input input {
+            flex: 1;
+        }
+        
+        /* Help */
+        .help-section {
+            text-align: center;
+            padding: 40px;
+            margin-top: 30px;
+            background: var(--dark2);
+            border-radius: 24px;
+            border: 1px solid var(--dark3);
+        }
+        
+        .help-section p {
+            color: var(--gray);
+            margin-bottom: 20px;
+        }
+        
+        /* Links */
+        .auth-link {
+            text-align: center;
+            margin-top: 25px;
+            color: var(--gray);
+        }
+        
+        .auth-link a {
+            color: var(--primary-light);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .auth-link a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">🤖 NineM's AI</div>
+        <h1>Get Your AI Chatbot</h1>
+        <p>2 Minutes • No Coding Required • Starts at $49/mo</p>
+    </header>
+    
+    <div class="container">
+        <!-- Step 1: Business Name -->
+        <div class="step active" id="step1">
+            <div class="step-number">1</div>
+            <h2>What's Your Business Name?</h2>
+            <p>This will personalize your chatbot for your customers.</p>
+            
+            <div class="input-group">
+                <input type="text" class="big-input" id="businessName" placeholder="e.g., Joe's Pizza">
+            </div>
+            
+            <button class="btn btn-block" onclick="nextStep(1)">Next Step →</button>
+        </div>
+        
+        <!-- Step 2: Website -->
+        <div class="step" id="step2">
+            <div class="step-number">2</div>
+            <h2>What's Your Website?</h2>
+            <p>Don't have one? Just skip this! We can still build your chatbot.</p>
+            
+            <div class="input-group">
+                <input type="text" class="big-input" id="website" placeholder="e.g., joespizza.com">
+            </div>
+            
+            <div style="display: flex; gap: 12px;">
+                <button class="btn btn-block" onclick="nextStep(2)">Next Step →</button>
+                <button class="btn btn-block btn-outline" onclick="nextStep(2, true)">Skip →</button>
+            </div>
+        </div>
+        
+        <!-- Step 3: Get Code -->
+        <div class="step" id="step3">
+            <div class="step-number">3</div>
+            <h2>Your Chatbot is Ready! 🎉</h2>
+            <p>Copy the code below and paste it on your website. That's it!</p>
+            
+            <button class="btn btn-success btn-block" onclick="generateCode()">✨ Generate My Chatbot</button>
+            
+            <div class="result-box" id="resultBox">
+                <div class="success-icon">✅</div>
+                <h3>Copy This Code:</h3>
+                <div class="result-code" id="embedCode">
+                    Click "Generate My Chatbot" above!
+                </div>
+                <button class="copy-btn" onclick="copyCode()">📋 Copy Code</button>
+                
+                <div class="instructions">
+                    <h4>📝 How to Install:</h4>
+                    <ol>
+                        <li>Copy the code above</li>
+                        <li>Go to your website builder (Wix, WordPress, Squarespace, etc.)</li>
+                        <li>Look for "Add Code" or "Embed HTML" or "Custom Code"</li>
+                        <li>Paste the code</li>
+                        <li><strong>Done!</strong> Your chatbot is live! 🎉</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Demo -->
+        <div class="demo-section">
+            <h2>👁️ Try It Now!</h2>
+            <p>Chat with your AI to see what customers will experience.</p>
+            
+            <div class="demo-chat" id="demoChat">
+                <div class="demo-msg bot">
+                    👋 Hi there! Welcome to <strong id="demoBusiness">Your Business</strong>!
+                    <br><br>
+                    I'm your AI assistant. Ask me anything!
+                </div>
+            </div>
+            
+            <div class="demo-input">
+                <input type="text" class="big-input" id="demoInput" placeholder="Type a message...">
+                <button class="btn" onclick="sendDemo()">Send</button>
+            </div>
+        </div>
+        
+        <!-- Help -->
+        <div class="help-section">
+            <h3>❓ Need Help Installing?</h3>
+            <p>We can help you install it for free - no stress!</p>
+            <a href="mailto:help@ninems.ai" class="btn">📧 Email Us for Help</a>
+            
+            <div class="auth-link">
+                Already have an account? <a href="login.html">Login here</a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let businessData = {
+            businessName: '',
+            website: ''
+        };
+        
+        function nextStep(step, skip = false) {
+            if (step === 1) {
+                const name = document.getElementById('businessName').value.trim();
+                if (!name) {
+                    alert('Please enter your business name!');
+                    return;
+                }
+                businessData.businessName = name;
+                document.getElementById('step1').classList.remove('active');
+                document.getElementById('step2').classList.add('active');
+            }
+            
+            if (step === 2) {
+                businessData.website = document.getElementById('website').value.trim();
+                document.getElementById('step2').classList.remove('active');
+                document.getElementById('step3').classList.add('active');
+                // Save to localStorage
+                localStorage.setItem('ninems_business', JSON.stringify(businessData));
+            }
+        }
+        
+        function generateCode() {
+            const name = encodeURIComponent(businessData.businessName);
+            const website = encodeURIComponent(businessData.website);
+            
+            const code = `<script src="https://ninems.ai/chat.js?business=${name}&website=${website}"><\/script>`;
+            document.getElementById('embedCode').textContent = code;
+            document.getElementById('resultBox').classList.add('show');
+            
+            // Update demo
+            document.getElementById('demoBusiness').textContent = businessData.businessName;
+            
+            // Create account in background
+            createAccount();
+        }
+        
+        function createAccount() {
+            const users = JSON.parse(localStorage.getItem('ninems_users') || '[]');
+            
+            // Check if already exists
+            const existing = users.find(u => u.businessName === businessData.businessName);
+            if (existing) {
+                localStorage.setItem('ninems_current', JSON.stringify(existing));
+                return;
+            }
+            
+            // Create new account
+            const newUser = {
+                id: 'biz-' + Date.now(),
+                businessName: businessData.businessName,
+                website: businessData.website,
+                email: '',
+                phone: '',
+                services: '',
+                description: '',
+                created: new Date().toISOString()
+            };
+            
+            users.push(newUser);
+            localStorage.setItem('ninems_users', JSON.stringify(users));
+            localStorage.setItem('ninems_current', JSON.stringify(newUser));
+        }
+        
+        function copyCode() {
+            const code = document.getElementById('embedCode').textContent;
+            navigator.clipboard.writeText(code);
+            alert('Copied! 📋 Paste it on your website.');
+        }
+        
+        function sendDemo() {
+            const input = document.getElementById('demoInput');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            const chat = document.getElementById('demoChat');
+            
+            // User message
+            chat.innerHTML += `<div class="demo-msg user">${message}</div>`;
+            chat.scrollTop = chat.scrollHeight;
+            input.value = '';
+            
+            // AI response (simulated)
+            setTimeout(() => {
+                const business = businessData.businessName || 'Our business';
+                chat.innerHTML += `<div class="demo-msg bot">
+                    Thanks for asking about <strong>${business}</strong>! 
+                    <br><br>
+                    I'd be happy to help you with that. Would you like to:
+                    <br><br>
+                    • Learn more about what we offer?
+                    <br>
+                    • Schedule an appointment?
+                    <br>
+                    • Get our contact info?
+                </div>`;
+                chat.scrollTop = chat.scrollHeight;
+            }, 1200);
+        }
+        
+        // Enter key support
+        document.getElementById('demoInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') sendDemo();
+        });
+        
+        // Load saved data
+        const saved = JSON.parse(localStorage.getItem('ninems_business') || '{}');
+        if (saved.businessName) {
+            document.getElementById('businessName').value = saved.businessName;
+        }
+    </script>
+</body>
+</html>
+
