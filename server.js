@@ -66,9 +66,15 @@ const PRICING_PLANS = {
 
 // MongoDB Connection
 if (MONGODB_URI) {
-    mongoose.connect(MONGODB_URI)
+    console.log('🔄 Attempting MongoDB connection...');
+    mongoose.connect(MONGODB_URI, {
+        serverSelectionTimeoutMS: 10000,
+        connectTimeoutMS: 10000
+    })
         .then(() => console.log('✅ Connected to MongoDB'))
         .catch(err => console.log('❌ MongoDB connection error:', err.message));
+} else {
+    console.log('⚠️ MONGODB_URI not set - using in-memory storage');
 }
 
 // User Schema
