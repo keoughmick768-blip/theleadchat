@@ -528,7 +528,9 @@ app.get('/api/debug/status', (req, res) => {
     res.json({
         mongooseState: mongoose.connection.readyState,
         stateName: states[mongoose.connection.readyState] || 'unknown',
-        mongoUriSet: !!process.env.MONGODB_URI
+        mongoUriSet: !!process.env.MONGODB_URI,
+        minimaxKeySet: !!process.env.MINIMAX_API_KEY,
+        minimaxKeyPrefix: process.env.MINIMAX_API_KEY ? process.env.MINIMAX_API_KEY.substring(0, 10) + '...' : 'NOT SET'
     });
 });
 
