@@ -22,6 +22,45 @@ const JWT_SECRET = process.env.JWT_SECRET || 'nineM-secret-key-change-in-product
 const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
 const MONGODB_URI = process.env.MONGODB_URI || '';
 
+// Stripe Configuration
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
+const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
+const FRONTEND_URL = process.env.FRONTEND_URL || 'https://theleadchat.onrender.com';
+
+let stripe;
+if (STRIPE_SECRET_KEY) {
+    stripe = require('stripe')(STRIPE_SECRET_KEY);
+    console.log('💳 Stripe configured');
+}
+
+// Pricing Plans
+const PRICING_PLANS = {
+    starter: {
+        name: 'Starter',
+        price: 29,
+        priceId: process.env.STRIPE_PRICE_STARTER || 'price_starter',
+        features: [
+            '1 phone number',
+            '100 AI responses/month',
+            'Basic chat widget',
+            'Email support'
+        ]
+    },
+    professional: {
+        name: 'Professional',
+        price: 79,
+        priceId: process.env.STRIPE_PRICE_PROFESSIONAL || 'price_professional',
+        features: [
+            '3 phone numbers',
+            'Unlimited AI responses',
+            'Advanced chat widget',
+            'Calendar integration',
+            'Priority support',
+            'Lead analytics'
+        ]
+    }
+};
+
 // MongoDB Connection
 if (MONGODB_URI) {
     mongoose.connect(MONGODB_URI)
@@ -460,6 +499,182 @@ app.post('/api/auth/reset-password', async (req, res) => {
     } catch (error) {
         console.error('Reset password error:', error);
         res.status(500).json({ error: 'Failed to reset password' });
+    }
+});
+
+// =======================
+// STRIPE PAYMENT ROUTES
+// =======================
+
+// Get pricing plans
+app.get('/api/pricing', (req, res) => {
+    res.json({ plans: PRICING_PLANS });
+});
+
+// Create checkout session
+app.post('/api/stripe/create-checkout-session', authenticateToken, async (req, res) => {
+    const { planId } = req.body;
+    const userId = req.user.id || req.userId;
+    
+    if (!stripe) {
+        return res.status(500).json({ error: 'Stripe not configured' });
+    }
+    
+    const plan = PRICING_PLANS[planId];
+    if (!plan) {
+        return res.status(400).json({ error: 'Invalid plan' });
+    }
+    
+    try {
+        // Get user email
+        let userEmail = '';
+        if (mongoose.connection.readyState === 1) {
+            const user = await User.findById(userId);
+            userEmail = user?.email || '';
+        } else {
+            const user = users.get(userId);
+            userEmail = user?.email || '';
+        }
+        
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: [{
+                price_data: {
+                    currency: 'usd',
+                    product_data: {
+                        name: `TheLeadChat - ${plan.name}`,
+                        description: `AI Receptionist - ${plan.name} Plan`
+                    },
+                    unit_amount: plan.price * 100, // cents
+                    recurring: {
+                        interval: 'month'
+                    }
+                },
+                quantity: 1
+            }],
+            mode: 'subscription',
+            success_url: `${FRONTEND_URL}/dashboard.html?payment=success`,
+            cancel_url: `${FRONTEND_URL}/pricing.html?payment=cancelled`,
+            customer_email: userEmail,
+            metadata: {
+                userId: userId,
+                plan: planId
+            }
+        });
+        
+        res.json({ sessionId: session.id, url: session.url });
+    } catch (error) {
+        console.error('Stripe checkout error:', error);
+        res.status(500).json({ error: 'Failed to create checkout session' });
+    }
+});
+
+// Stripe webhook handler
+app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+    const sig = req.headers['stripe-signature'];
+    let event;
+    
+    try {
+        event = stripe.webhooks.constructEvent(req.body, sig, STRIPE_WEBHOOK_SECRET);
+    } catch (err) {
+        console.error('Webhook signature verification failed:', err.message);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+    
+    // Handle the event
+    switch (event.type) {
+        case 'checkout.session.completed': {
+            const session = event.data.object;
+            const userId = session.metadata.userId;
+            const planId = session.metadata.plan;
+            
+            console.log(`✅ Payment completed for user ${userId}, plan: ${planId}`);
+            
+            // Update user subscription status in database
+            if (mongoose.connection.readyState === 1) {
+                await User.findByIdAndUpdate(userId, {
+                    subscription: {
+                        plan: planId,
+                        status: 'active',
+                        stripeCustomerId: session.customer,
+                        stripeSubscriptionId: session.subscription
+                    }
+                });
+            }
+            break;
+        }
+        
+        case 'customer.subscription.deleted': {
+            const subscription = event.data.object;
+            console.log(`❌ Subscription cancelled: ${subscription.id}`);
+            
+            // Update user to no longer have active subscription
+            if (mongoose.connection.readyState === 1) {
+                await User.findOneAndUpdate(
+                    { 'subscription.stripeSubscriptionId': subscription.id },
+                    { 'subscription.status': 'cancelled' }
+                );
+            }
+            break;
+        }
+        
+        default:
+            console.log(`Unhandled event type: ${event.type}`);
+    }
+    
+    res.json({ received: true });
+});
+
+// Get user subscription status
+app.get('/api/user/subscription', authenticateToken, async (req, res) => {
+    const userId = req.user.id || req.userId;
+    
+    try {
+        if (mongoose.connection.readyState === 1) {
+            const user = await User.findById(userId).select('subscription');
+            res.json({ subscription: user?.subscription || null });
+        } else {
+            const user = users.get(userId);
+            res.json({ subscription: user?.subscription || null });
+        }
+    } catch (error) {
+        console.error('Get subscription error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Create customer portal session
+app.post('/api/stripe/create-portal-session', authenticateToken, async (req, res) => {
+    const userId = req.user.id || req.userId;
+    
+    if (!stripe) {
+        return res.status(500).json({ error: 'Stripe not configured' });
+    }
+    
+    try {
+        let stripeCustomerId;
+        
+        if (mongoose.connection.readyState === 1) {
+            const user = await User.findById(userId).select('subscription');
+            stripeCustomerId = user?.subscription?.stripeCustomerId;
+        } else {
+            const user = users.get(userId);
+            stripeCustomerId = user?.subscription?.stripeCustomerId;
+        }
+        
+        if (!stripeCustomerId) {
+            return res.status(400).json({ error: 'No subscription found' });
+        }
+        
+        const session = await stripe.billingPortal.sessions.create({
+            customer: stripeCustomerId,
+            return_url: `${FRONTEND_URL}/dashboard.html`
+        });
+        
+        res.json({ url: session.url });
+    } catch (error) {
+        console.error('Portal session error:', error);
+        res.status(500).json({ error: 'Failed to create portal session' });
     }
 });
 
