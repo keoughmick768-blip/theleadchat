@@ -511,6 +511,21 @@ app.post('/api/auth/reset-password', async (req, res) => {
 // STRIPE PAYMENT ROUTES
 // =======================
 
+// Debug: Check MongoDB connection status
+app.get('/api/debug/status', (req, res) => {
+    const states = {
+        0: 'disconnected',
+        1: 'connected', 
+        2: 'connecting',
+        3: 'disconnecting'
+    };
+    res.json({
+        mongooseState: mongoose.connection.readyState,
+        stateName: states[mongoose.connection.readyState] || 'unknown',
+        mongoUriSet: !!process.env.MONGODB_URI
+    });
+});
+
 // Get pricing plans
 app.get('/api/pricing', (req, res) => {
     res.json({ plans: PRICING_PLANS });
