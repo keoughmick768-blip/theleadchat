@@ -1066,7 +1066,7 @@ Be friendly, professional, and concise. Help customers with their questions.${kn
         console.log('Using API key:', minimaxKey ? 'Key loaded' : 'NO KEY');
         
         const response = await axios.post('https://api.minimax.chat/v1/text/chatcompletion_v2', {
-            model: 'MiniMax-M2.5',
+            model: 'abab6.5s-chat',
             messages: messages
         }, {
             headers: {
