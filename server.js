@@ -2114,6 +2114,58 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// Twilio Voice Webhook - Handle incoming calls
+app.post('/api/twilio/voice', express.urlencoded({ extended: false }), (req, res) => {
+    const from = req.body.From || '';
+    const called = req.body.To || '';
+    
+    console.log(`📞 Incoming voice call from ${from} to ${called}`);
+    
+    // Forward to Mick's phone (your number)
+    const FORWARD_TO = '+17043750088'; // Your actual number
+    
+    // TwiML response - forward the call
+    const twiml = `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Say voice="Polly.Joanna-Neural">Thanks for calling TheLeadChat! Connecting you now.</Say>
+    <Dial>
+        <Number>${FORWARD_TO}</Number>
+    </Dial>
+</Response>`;
+    
+    res.type('text/xml');
+    res.send(twiml);
+});
+
+// Twilio SMS Webhook - Handle incoming texts
+app.post('/api/twilio/sms', express.urlencoded({ extended: false }), async (req, res) => {
+    const from = req.body.From || '';
+    const body = req.body.Body || '';
+    const to = req.body.To || '';
+    
+    console.log(`💬 Incoming SMS from ${from}: ${body}`);
+    
+    // Get TheLeadChat business info (hardcoded for now)
+    const businessInfo = {
+        name: 'TheLeadChat',
+        services: 'AI Receptionist, Lead Capture, Appointment Booking',
+        areas: 'Charlotte, NC and surrounding areas',
+        unique: '24/7 AI that never misses a lead'
+    };
+    
+    // Generate AI response
+    const aiResponse = getSmartFallback(businessInfo, body);
+    
+    // Send response via Twilio
+    const twiml = `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Message>${aiResponse}</Message>
+</Response>`;
+    
+    res.type('text/xml');
+    res.send(twiml);
+});
+
 // Serve demo widget page
 app.get('/demo', (req, res) => {
     res.sendFile(path.join(__dirname, 'chatbot-demo.html'));
