@@ -735,7 +735,31 @@
             
             response.innerHTML = '<div class="loading"><span class="dot"></span><span class="dot"></span><span class="dot"></span> AI is thinking...</div>';
             
-            // Simulate AI response (in real app, this would call the API)
+            // Try calling the real API
+            try {
+                const apiUrl = '/api/chat';
+                const res = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: input,
+                        history: [],
+                        business: userData.businessName || 'My Business'
+                    })
+                });
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.response && data.response !== "I'm currently unavailable") {
+                        response.innerHTML = `<strong>🤖 AI Response:</strong><br><br>${data.response}`;
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.log('API call failed, using smart fallback');
+            }
+            
+            // Fallback to smart responses
             setTimeout(() => {
                 const services = document.getElementById('editServices').value || userData.services || 'our services';
                 const areas = document.getElementById('editAreas').value || userData.areas || 'your area';
@@ -746,6 +770,7 @@
                     'price': `We'd be happy to discuss pricing! It depends on your needs. Would you like a free consultation?`,
                     'area': `We serve ${areas}. What area are you in?`,
                     'hello': `Hi! Thanks for reaching out! How can we help you today?`,
+                    'book': `I'd be happy to help you schedule something! What works best for you - a call or an in-person meeting?`,
                     'default': `Thanks for contacting us! We're here to help. What questions do you have about ${services}?`
                 };
                 
@@ -756,8 +781,9 @@
                 else if (lower.includes('price') || lower.includes('cost') || lower.includes('how much')) reply = responses.price;
                 else if (lower.includes('area') || lower.includes('where')) reply = responses.area;
                 else if (lower.includes('hi') || lower.includes('hello')) reply = responses.hello;
+                else if (lower.includes('book') || lower.includes('schedule') || lower.includes('appointment')) reply = responses.book;
                 
-                response.innerHTML = `<strong>AI Response:</strong><br><br>${reply}`;
+                response.innerHTML = `<strong>🤖 AI Response (Smart Fallback):</strong><br><br>${reply}`;
             }, 1500);
         }
         

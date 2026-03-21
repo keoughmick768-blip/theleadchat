@@ -312,16 +312,37 @@ Instructions:
             }
         }
         
-        // Simulated MiniMax call - in production, replace with actual API
+        // Call AI API - tries real API first, falls back to smart responses
         async function callMiniMax(context, userMessage, history) {
-            // For demo, use intelligent fallback
-            // In production: call https://api.minimax.chat/v1/text/chatcompletion_v2
+            // Try calling the real API first
+            try {
+                const apiUrl = 'https://theleadchat.onrender.com/api/chat';
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: userMessage,
+                        history: history,
+                        business: businessInfo.name
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.response && data.response !== "I'm currently unavailable") {
+                        return data.response;
+                    }
+                }
+            } catch (e) {
+                console.log('API call failed, using smart responses');
+            }
             
+            // Fallback to smart responses
             return new Promise(resolve => {
                 setTimeout(() => {
                     const response = generateSmartResponse(userMessage, context);
                     resolve(response);
-                }, 1500);
+                }, 800);
             });
         }
         

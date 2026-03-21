@@ -984,6 +984,34 @@ function saveChatHistory(userId, history) {
     }
 }
 
+// Smart fallback responses when AI is unavailable
+function getSmartFallback(businessInfo, userMessage) {
+    const msg = userMessage.toLowerCase();
+    const business = businessInfo || 'our business';
+    
+    // Common patterns and responses
+    const patterns = [
+        { keywords: ['price', 'cost', 'how much', 'charge', 'fee'], response: `Great question! Our pricing varies based on your needs. For a personalized quote, I'd recommend speaking with our team directly. Would you like us to call you?` },
+        { keywords: ['book', 'schedule', 'appointment', 'meeting', 'consultation'], response: `I'd be happy to help you schedule something! We offer flexible times including evenings and weekends. What's works best for you - a quick call or an in-person meeting?` },
+        { keywords: ['service', 'services', 'offer', 'what do you do'], response: `We offer a range of services to help businesses like yours. From lead capture to customer support automation, we'd love to learn more about your needs. What challenge are you trying to solve?` },
+        { keywords: ['contact', 'phone', 'call', 'email', 'reach', 'address'], response: `You can reach us by phone, email, or through this chat! For the fastest response, give us a call. Would you like me to have someone contact you directly?` },
+        { keywords: ['hour', 'hours', 'open', 'time', 'when'], response: `We're here to help! Our standard hours are Monday-Friday, 9-6. But we understand business never sleeps - feel free to leave a message and we'll get back to you ASAP!` },
+        { keywords: ['help', 'need', 'want', 'looking for'], response: `I'd love to help! To better understand what you need, could you tell me a bit more about what you're looking for?` },
+        { keywords: ['thank', 'thanks', 'great', 'awesome', 'nice'], response: `You're welcome! Is there anything else I can help you with?` },
+        { keywords: ['bye', 'goodbye', 'later'], response: `Thanks for chatting with us! Feel free to come back anytime. Have a great day!` }
+    ];
+    
+    // Find matching pattern
+    for (const p of patterns) {
+        if (p.keywords.some(k => msg.includes(k))) {
+            return p.response;
+        }
+    }
+    
+    // Default response
+    return `Thanks for reaching out! I'm here to help. Could you tell me more about what you're looking for? I can help with questions about our services, pricing, scheduling, or anything else you need!`;
+}
+
 // API: Send chat message
 app.post('/api/chat', authenticateToken, async (req, res) => {
     const { message, history = [], business, model } = req.body;
@@ -1077,6 +1105,12 @@ Be friendly, professional, and concise. Help customers with their questions.${kn
         });
         
         console.log('MiniMax response:', JSON.stringify(response.data, null, 2));
+        
+        // Check for API errors in response
+        if (response.data.base_resp && response.data.base_resp.status_code !== 0) {
+            throw new Error(`MiniMax API error: ${response.data.base_resp.status_msg || 'Unknown error'}`);
+        }
+        
         let aiResponse = response.data.choices?.[0]?.message?.content || response.data.reply || 'No response';
         
         // Check if AI is unsure (low confidence responses)
@@ -1135,11 +1169,107 @@ Be friendly, professional, and concise. Help customers with their questions.${kn
     } catch (error) {
         console.error('MiniMax error:', error.message);
         
-        // Fallback response if MiniMax is unavailable
-        res.json({
-            response: "I'm currently unavailable. Please check your API configuration.",
-            error: 'AI service unavailable'
-        });
+        // Fallback to Ollama if MiniMax fails
+        try {
+            console.log('Falling back to Ollama...');
+            const ollamaResponse = await axios.post(`${OLLAMA_URL}/api/chat`, {
+                model: 'qwen3-coder:30b',
+                messages: messages,
+                stream: false
+            });
+            
+            let aiResponse = ollamaResponse.data.message.content;
+            console.log('Ollama response:', aiResponse);
+            
+            // Save to history
+            const newHistory = [
+                ...history,
+                { role: 'user', content: message },
+                { role: 'assistant', content: aiResponse }
+            ];
+            
+            if (newHistory.length > 50) {
+                newHistory.splice(0, newHistory.length - 50);
+            }
+            
+            saveChatHistory(req.userId, newHistory);
+            
+            return res.json({ 
+                response: aiResponse,
+                history: newHistory,
+                flagged: false,
+                source: 'ollama'
+            });
+            
+        } catch (ollamaError) {
+            console.error('Ollama fallback error:', ollamaError.message);
+            
+            // Try OpenRouter as second fallback (free models!)
+            try {
+                console.log('Trying OpenRouter (free tier)...');
+                const openrouterResponse = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
+                    model: 'google/gemma-3n-e4b', // Free model
+                    messages: messages,
+                    max_tokens: 500
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY || 'free'}`,
+                        'Content-Type': 'application/json',
+                        'HTTP-Referer': FRONTEND_URL,
+                        'X-Title': 'TheLeadChat'
+                    },
+                    timeout: 30000
+                });
+                
+                let aiResponse = openrouterResponse.data.choices[0].message.content;
+                console.log('OpenRouter response:', aiResponse);
+                
+                const newHistory = [
+                    ...history,
+                    { role: 'user', content: message },
+                    { role: 'assistant', content: aiResponse }
+                ];
+                
+                if (newHistory.length > 50) {
+                    newHistory.splice(0, newHistory.length - 50);
+                }
+                
+                saveChatHistory(req.userId, newHistory);
+                
+                return res.json({ 
+                    response: aiResponse,
+                    history: newHistory,
+                    flagged: false,
+                    source: 'openrouter'
+                });
+                
+            } catch (openrouterError) {
+                console.error('OpenRouter error:', openrouterError.message);
+                
+                // Final fallback: use smart responses
+                console.log('Using smart fallback responses');
+                const fallbackResponse = getSmartFallback(businessInfo, message);
+                
+                const newHistory = [
+                    ...history,
+                    { role: 'user', content: message },
+                    { role: 'assistant', content: fallbackResponse }
+                ];
+                
+                if (newHistory.length > 50) {
+                    newHistory.splice(0, newHistory.length - 50);
+                }
+                
+                saveChatHistory(req.userId, newHistory);
+                
+                return res.json({ 
+                    response: fallbackResponse,
+                    history: newHistory,
+                    flagged: false,
+                    source: 'smart-fallback'
+                });
+            }
+        }
     }
 });
 
@@ -1158,6 +1288,29 @@ app.delete('/api/chat/history', authenticateToken, (req, res) => {
 // =======================
 // OLLAMA PROXY
 // =======================
+
+// Simple test endpoint (no auth)
+app.post('/api/test/chat', async (req, res) => {
+    const { message } = req.body;
+    
+    if (!message) {
+        return res.status(400).json({ error: 'Message required' });
+    }
+    
+    try {
+        const response = await axios.post(`${OLLAMA_URL}/api/chat`, {
+            model: 'qwen3-coder:30b',
+            messages: [{ role: 'user', content: message }],
+            stream: false
+        });
+        
+        const aiResponse = response.data.message.content;
+        res.json({ response: aiResponse });
+    } catch (error) {
+        console.error('Test chat error:', error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
 
 // Proxy to Ollama (for direct widget connections)
 app.post('/api/ollama/chat', async (req, res) => {
@@ -1251,7 +1404,7 @@ app.post('/api/webhook/twilio', express.urlencoded({ extended: false }), async (
 Be friendly and professional. Help the customer with their inquiry.`;
         
         const response = await axios.post(`${OLLAMA_URL}/api/chat`, {
-            model: 'qwen2.5:7b',
+            model: 'qwen3-coder:30b',
             messages: [
                 { role: 'system', content: systemPrompt },
                 ...lead.messages.slice(-10)
