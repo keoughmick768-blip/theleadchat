@@ -431,6 +431,37 @@
         @media (max-width: 768px) {
             .nav-links { display: none; }
             .hero { padding-top: 120px; }
+            .hero h1 { font-size: 2rem; }
+            .hero p { font-size: 1rem; padding: 0 10px; }
+            .steps { grid-template-columns: 1fr; }
+            .pricing-grid { grid-template-columns: 1fr; }
+            .header-content { flex-direction: column; gap: 16px; padding: 0 15px; }
+            .feature-grid { grid-template-columns: 1fr; padding: 0 15px; }
+            .step { padding: 15px; }
+            .pricing-card { margin: 0 15px; padding: 20px; }
+            .hero { padding: 120px 15px 60px; }
+            section { padding: 60px 15px; }
+            footer { padding: 40px 15px; }
+            .logo { font-size: 1.3rem; }
+            .btn { padding: 10px 20px; font-size: 0.9rem; }
+            h2 { font-size: 1.5rem; }
+        }
+        
+        /* Extra small devices */
+        @media (max-width: 480px) {
+            .hero h1 { font-size: 1.75rem; }
+            .hero .subtitle { font-size: 1rem; }
+            .header-content { padding: 0 10px; }
+            .pricing-card { margin: 0 10px; }
+            .feature-card { padding: 15px; }
+            section { padding: 40px 10px; }
+        }
+        
+        /* Touch-friendly for mobile */
+        @media (hover: none) {
+            .btn { padding: 14px 28px; }
+            .btn:hover { transform: none; }
+            a:active { opacity: 0.8; }
         }
     </style>
 </head>
