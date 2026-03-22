@@ -2176,6 +2176,37 @@ app.get('/api/admin/twilio/numbers', async (req, res) => {
     }
 });
 
+// API: Send outbound SMS (for marketing to leads)
+app.post('/api/admin/twilio/send-sms', async (req, res) => {
+    const { to, message } = req.body;
+    
+    if (!to || !message) {
+        return res.status(400).json({ error: 'Phone number and message required' });
+    }
+    
+    const twilio = getTwilioClient();
+    if (!twilio) {
+        return res.status(400).json({ error: 'Twilio not configured' });
+    }
+    
+    try {
+        // Use the marketing toll-free number
+        const fromNumber = process.env.TWILIO_NUMBER || '+18889688198';
+        
+        const result = await twilio.messages.create({
+            body: message,
+            from: fromNumber,
+            to: to
+        });
+        
+        console.log(`📤 Outbound SMS sent to ${to}: ${message.substring(0, 50)}...`);
+        res.json({ success: true, sid: result.sid, status: result.status });
+    } catch (error) {
+        console.error('Error sending SMS:', error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // API: Release a number
 app.delete('/api/admin/twilio/numbers/:sid', async (req, res) => {
     const twilio = getTwilioClient();
