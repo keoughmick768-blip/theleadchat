@@ -1485,31 +1485,65 @@ Be friendly and professional. Help the customer with their inquiry.`;
 
 // Handle missed calls - send auto-SMS
 app.post('/api/webhook/twilio/missed-call', express.urlencoded({ extended: false }), async (req, res) => {
-    const { From } = req.body;
+    const from = req.body.From || '';  // The lead's phone number
+    const to = req.body.To || '';       // The business's Twilio number
     
-    console.log(`Missed call from ${From}`);
+    console.log(`📞 Missed call from ${from} to ${to}`);
     
-    // Send auto-reply SMS
-    if (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN && TWILIO_PHONE_NUMBER) {
+    let businessInfo = null;
+    let userId = null;
+    
+    // Find the user/business by their Twilio number
+    try {
+        if (mongoose.connection.readyState === 1) {
+            const user = await User.findOne({ twilioNumber: to });
+            if (user) {
+                userId = user._id.toString();
+                businessInfo = {
+                    name: user.businessName || 'We',
+                    services: user.services || '',
+                    unique: user.unique || '',
+                    openingMessage: user.openingMessage || '',
+                    calendlyLink: user.calendlyLink || ''
+                };
+                console.log(`📱 Found business: ${user.businessName}`);
+            }
+        }
+    } catch (e) {
+        console.error('Error finding user:', e.message);
+    }
+    
+    // Build personalized auto-reply message
+    let autoReplyMessage;
+    if (businessInfo && businessInfo.openingMessage) {
+        autoReplyMessage = businessInfo.openingMessage;
+    } else if (businessInfo) {
+        autoReplyMessage = `Hi! Thanks for calling ${businessInfo.name}. We missed your call but we're here to help! ${businessInfo.services ? `We offer: ${businessInfo.services}` : ''} Reply to this message or visit our website.`;
+    } else {
+        autoReplyMessage = "Hi! Thanks for calling. We missed your call but we're here to help! Reply to this message or visit our website.";
+    }
+    
+    // Send auto-reply SMS using Twilio
+    const twilio = getTwilioClient();
+    if (twilio && to) {
         try {
-            const twilio = require('twilio')(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
-            
             await twilio.messages.create({
-                body: "Hey! You called. Want to chat? Reply here or visit our website!",
-                from: TWILIO_PHONE_NUMBER,
-                to: From
+                body: autoReplyMessage,
+                from: to,  // Send from the BUSINESS's number
+                to: from   // Send TO the lead
             });
             
-            console.log(`Auto-SMS sent to ${From}`);
+            console.log(`✅ Auto-SMS sent to ${from}: ${autoReplyMessage.substring(0, 50)}...`);
         } catch (error) {
-            console.error('Twilio error:', error.message);
+            console.error('Twilio SMS error:', error.message);
         }
     }
     
+    // Return TwiML to play a message to the caller
     res.type('text/xml');
     res.send(`<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-    <Message>Thanks for calling! We'll text you shortly.</Message>
+    <Say>Thanks for calling! We've sent you a text message. We'll get back to you shortly.</Say>
 </Response>`);
 });
 
@@ -2192,21 +2226,41 @@ app.get('/', (req, res) => {
 });
 
 // Twilio Voice Webhook - Handle incoming calls
-app.post('/api/twilio/voice', express.urlencoded({ extended: false }), (req, res) => {
+app.post('/api/twilio/voice', express.urlencoded({ extended: false }), async (req, res) => {
     const from = req.body.From || '';
-    const called = req.body.To || '';
+    const to = req.body.To || '';  // The business's Twilio number
     
-    console.log(`📞 Incoming voice call from ${from} to ${called}`);
+    console.log(`📞 Incoming voice call from ${from} to ${to}`);
     
-    // Forward to Mick's phone (your number)
-    const FORWARD_TO = '+17043750088'; // Your actual number
+    let forwardTo = null;
+    let businessName = 'us';
+    
+    // Find the user by their Twilio number and get their forwarding number
+    try {
+        if (mongoose.connection.readyState === 1) {
+            const user = await User.findOne({ twilioNumber: to });
+            if (user && user.phone) {
+                forwardTo = user.phone;
+                businessName = user.businessName || 'us';
+                console.log(`📱 Forwarding call for ${businessName} to ${forwardTo}`);
+            }
+        }
+    } catch (e) {
+        console.error('Error finding user for call forwarding:', e.message);
+    }
+    
+    // Default to Mick if no user found
+    if (!forwardTo) {
+        forwardTo = '+17043750088';
+        businessName = 'TheLeadChat';
+    }
     
     // TwiML response - forward the call
     const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-    <Say voice="Polly.Joanna-Neural">Thanks for calling TheLeadChat! Connecting you now.</Say>
+    <Say voice="Polly.Joanna-Neural">Thanks for calling ${businessName}! Connecting you now.</Say>
     <Dial>
-        <Number>${FORWARD_TO}</Number>
+        <Number>${forwardTo}</Number>
     </Dial>
 </Response>`;
     
