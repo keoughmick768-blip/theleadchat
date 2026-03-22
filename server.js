@@ -987,10 +987,31 @@ function saveChatHistory(userId, history) {
 // Smart fallback responses when AI is unavailable
 function getSmartFallback(businessInfo, userMessage) {
     const msg = userMessage.toLowerCase();
-    const business = businessInfo || 'our business';
+    const businessName = (businessInfo?.name || '').toLowerCase();
+    const isTheLeadChat = businessName.includes('leadchat') || businessName.includes('the lead');
     
-    // Common patterns and responses
-    const patterns = [
+    // TheLeadChat-specific responses (Mick's SaaS business)
+    if (isTheLeadChat) {
+        const theleadchatPatterns = [
+            { keywords: ['price', 'cost', 'how much', 'charge', 'fee', 'pricing'], response: `We have two plans: Starter at $59/month (1 phone number, 100 AI responses/month, basic widget) and Pro at $97/month (3 phone numbers, unlimited AI, calendar integration, priority support). Which one interests you?` },
+            { keywords: ['sign up', 'register', 'signup', 'get started', 'create account'], response: `You can sign up right now at theleadchat.com! Just click 'Get Started', enter your email and business name, and you'll be up and running in minutes. Want me to send you the link?` },
+            { keywords: ['what do you do', 'what is', 'how does it work', 'services'], response: `TheLeadChat is an AI receptionist that never misses a lead! When customers call or text your business, we answer immediately with AI, capture their info, answer questions, and can even book appointments - 24/7!` },
+            { keywords: ['phone number', 'toll free', 'get a number', 'own number'], response: `When you sign up, we automatically provision a toll-free phone number for your business. Your customers call and text that number and our AI handles everything!` },
+            { keywords: ['missed call', 'miss you', 'if i miss'], response: `No worries! If you miss a call, our AI immediately texts the caller back letting them know you'll get back to soon. You'll also get a notification with all their details.` },
+            { keywords: ['free trial', 'trial', 'free'], response: `Yes! We offer a 7-day free trial so you can test everything out. No credit card required to start. Just go to theleadchat.com and click 'Get Started'!` },
+            { keywords: ['demo', 'see it', 'how does it look'], response: `I'd love to show you! You can see it in action at theleadchat.com or I can schedule a quick demo call. What works best for you?` },
+            { keywords: ['contact', 'speak to someone', 'talk to', 'manager'], response: `I can help you get started! If you'd prefer to talk to someone, just let me know your phone number and the best time to reach you.` }
+        ];
+        
+        for (const p of theleadchatPatterns) {
+            if (p.keywords.some(k => msg.includes(k))) {
+                return p.response;
+            }
+        }
+    }
+    
+    // Default business patterns
+    const defaultPatterns = [
         { keywords: ['price', 'cost', 'how much', 'charge', 'fee'], response: `Great question! Our pricing varies based on your needs. For a personalized quote, I'd recommend speaking with our team directly. Would you like us to call you?` },
         { keywords: ['book', 'schedule', 'appointment', 'meeting', 'consultation'], response: `I'd be happy to help you schedule something! We offer flexible times including evenings and weekends. What's works best for you - a quick call or an in-person meeting?` },
         { keywords: ['service', 'services', 'offer', 'what do you do'], response: `We offer a range of services to help businesses like yours. From lead capture to customer support automation, we'd love to learn more about your needs. What challenge are you trying to solve?` },
@@ -1002,7 +1023,7 @@ function getSmartFallback(businessInfo, userMessage) {
     ];
     
     // Find matching pattern
-    for (const p of patterns) {
+    for (const p of defaultPatterns) {
         if (p.keywords.some(k => msg.includes(k))) {
             return p.response;
         }
@@ -1026,13 +1047,30 @@ async function getMiniMaxResponse(businessInfo, userMessage, knowledgeBase = [])
         ? `\n\nUse these Q&A pairs to answer questions when relevant:\n${knowledgeBase.map(kb => `Q: ${kb.question}\nA: ${kb.answer}`).join('\n\n')}`
         : '';
     
+    // Check if this is TheLeadChat
+    const isTheLeadChat = (businessInfo.name || '').toLowerCase().includes('leadchat');
+    
+    // Add specific info for TheLeadChat
+    let theleadchatInfo = '';
+    if (isTheLeadChat) {
+        theleadchatInfo = `
+IMPORTANT - You represent TheLeadChat SaaS:
+- Pricing: Starter $59/mo (1 phone#, 100 AI responses), Pro $97/mo (3 phone#, unlimited AI, calendar)
+- Sign up at theleadchat.com
+- It's an AI receptionist that never misses leads - answers calls/texts 24/7
+- Automatically texts back missed calls
+- Can answer questions about the service, pricing, and sign up process
+- Always encourage sign up or demo!`;
+    }
+    
     const systemPrompt = `You are a helpful AI assistant for ${businessInfo.name}.
 Business Services: ${businessInfo.services || 'general services'}
 Service Areas: ${businessInfo.areas || 'all areas'}
 What Makes Us Unique: ${businessInfo.unique || 'quality service'}
+${theleadchatInfo}
 ${knowledgeContext}
 
-Be friendly, professional, and concise. Help customers with their questions. If asked about pricing, suggest they call for a custom quote. If asked to book, offer to schedule or provide calendly link if available.`;
+Be friendly, professional, and concise. Help customers with their questions. If asked about pricing, give the actual prices. If asked to book, offer to schedule or provide calendly link if available.`;
 
     try {
         const response = await axios.post('https://api.minimax.chat/v1/text/chatcompletion_v2', {
