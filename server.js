@@ -2251,7 +2251,7 @@ app.post('/api/twilio/voice', express.urlencoded({ extended: false }), async (re
     
     // Default to Mick if no user found
     if (!forwardTo) {
-        forwardTo = '+17043750088';
+        forwardTo = '+19802450074';
         businessName = 'TheLeadChat';
     }
     
