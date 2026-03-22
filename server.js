@@ -40,7 +40,7 @@ if (STRIPE_SECRET_KEY) {
 const PRICING_PLANS = {
     starter: {
         name: 'Starter',
-        price: 29,
+        price: 59,
         priceId: process.env.STRIPE_PRICE_STARTER || 'price_starter',
         features: [
             '1 phone number',
@@ -50,8 +50,8 @@ const PRICING_PLANS = {
         ]
     },
     professional: {
-        name: 'Professional',
-        price: 79,
+        name: 'Pro',
+        price: 97,
         priceId: process.env.STRIPE_PRICE_PROFESSIONAL || 'price_professional',
         features: [
             '3 phone numbers',
@@ -2249,9 +2249,9 @@ app.post('/api/twilio/voice', express.urlencoded({ extended: false }), async (re
         console.error('Error finding user for call forwarding:', e.message);
     }
     
-    // Default to Mick if no user found
+    // Default to Mick if no user found (TheLeadChat main line)
     if (!forwardTo) {
-        forwardTo = '+19802450074';
+        forwardTo = '+19802450074';  // Mick's phone - TheLeadChat's main number
         businessName = 'TheLeadChat';
     }
     
