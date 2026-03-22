@@ -1012,6 +1012,55 @@ function getSmartFallback(businessInfo, userMessage) {
     return `Thanks for reaching out! I'm here to help. Could you tell me more about what you're looking for? I can help with questions about our services, pricing, scheduling, or anything else you need!`;
 }
 
+// Generate AI response using MiniMax (reusable function)
+async function getMiniMaxResponse(businessInfo, userMessage, knowledgeBase = []) {
+    const minimaxKey = process.env.MINIMAX_API_KEY;
+    
+    if (!minimaxKey) {
+        console.log('No MiniMax API key, using fallback');
+        return getSmartFallback(businessInfo, userMessage);
+    }
+    
+    // Build knowledge base context
+    const knowledgeContext = knowledgeBase.length > 0 
+        ? `\n\nUse these Q&A pairs to answer questions when relevant:\n${knowledgeBase.map(kb => `Q: ${kb.question}\nA: ${kb.answer}`).join('\n\n')}`
+        : '';
+    
+    const systemPrompt = `You are a helpful AI assistant for ${businessInfo.name}.
+Business Services: ${businessInfo.services || 'general services'}
+Service Areas: ${businessInfo.areas || 'all areas'}
+What Makes Us Unique: ${businessInfo.unique || 'quality service'}
+${knowledgeContext}
+
+Be friendly, professional, and concise. Help customers with their questions. If asked about pricing, suggest they call for a custom quote. If asked to book, offer to schedule or provide calendly link if available.`;
+
+    try {
+        const response = await axios.post('https://api.minimax.chat/v1/text/chatcompletion_v2', {
+            model: 'abab6.5s-chat',
+            messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: userMessage }
+            ]
+        }, {
+            headers: {
+                'Authorization': `Bearer ${minimaxKey}`,
+                'Content-Type': 'application/json'
+            },
+            timeout: 60000
+        });
+        
+        if (response.data.base_resp && response.data.base_resp.status_code !== 0) {
+            throw new Error(`MiniMax API error: ${response.data.base_resp.status_msg || 'Unknown error'}`);
+        }
+        
+        return response.data.choices?.[0]?.message?.content || response.data.reply || getSmartFallback(businessInfo, userMessage);
+        
+    } catch (error) {
+        console.error('MiniMax error:', error.message);
+        return getSmartFallback(businessInfo, userMessage);
+    }
+}
+
 // API: Send chat message
 app.post('/api/chat', authenticateToken, async (req, res) => {
     const { message, history = [], business, model } = req.body;
@@ -2079,23 +2128,51 @@ async function assignPhoneNumberToUser(userId) {
     }
     
     try {
-        // Find an unassigned number (we'll use friendlyName to track this)
+        // First, check for unassigned numbers in the account
         const numbers = await twilio.incomingPhoneNumbers.list({ limit: 50 });
-        
-        // Find a number not already assigned to a user
-        // In production, store this mapping in MongoDB
         const availableNumbers = numbers.filter(n => !n.friendlyName || !n.friendlyName.startsWith('assigned:'));
         
-        if (availableNumbers.length === 0) {
-            console.log('No available phone numbers');
-            return null;
+        if (availableNumbers.length > 0) {
+            // Use an existing available number
+            const number = availableNumbers[0];
+            await twilio.incomingPhoneNumbers(number.sid).update({
+                friendlyName: `assigned:${userId}`
+            });
+            console.log(`Assigned existing number ${number.phoneNumber} to user ${userId}`);
+            return number.phoneNumber;
         }
         
-        // Mark the number as assigned
-        const number = availableNumbers[0];
-        await twilio.incomingPhoneNumbers(number.sid).update({
-            friendlyName: `assigned:${userId}`
-        });
+        // No available numbers - BUY A NEW TOLL-FREE NUMBER
+        console.log('No available numbers, purchasing a new toll-free number...');
+        
+        try {
+            // Search for available toll-free numbers
+            const tollFreeNumbers = await twilio.availablePhoneNumbers('US').tollFree.list({
+                limit: 5,
+                capabilities: ['SMS']
+            });
+            
+            if (tollFreeNumbers.length === 0) {
+                console.log('No toll-free numbers available');
+                return null;
+            }
+            
+            // Buy the first available toll-free number
+            const newNumber = tollFreeNumbers[0];
+            const purchased = await twilio.incomingPhoneNumbers.create({
+                phoneNumberSid: newNumber.sid,
+                friendlyName: `assigned:${userId}`,
+                smsUrl: `${process.env.SERVER_URL || 'https://theleadchat.onrender.com'}/api/twilio/sms`,
+                smsMethod: 'POST'
+            });
+            
+            console.log(`🎉 Purchased new toll-free number ${purchased.phoneNumber} for user ${userId}`);
+            return purchased.phoneNumber;
+            
+        } catch (buyError) {
+            console.error('Error buying toll-free number:', buyError.message);
+            return null;
+        }
         
         console.log(`Assigned number ${number.phoneNumber} to user ${userId}`);
         return number.phoneNumber;
@@ -2141,29 +2218,94 @@ app.post('/api/twilio/voice', express.urlencoded({ extended: false }), (req, res
 app.post('/api/twilio/sms', express.urlencoded({ extended: false }), async (req, res) => {
     const from = req.body.From || '';
     const body = req.body.Body || '';
-    const to = req.body.To || '';
+    const to = req.body.To || '';  // This is the client's Twilio number
     
-    console.log(`💬 Incoming SMS from ${from}: ${body}`);
+    console.log(`💬 Incoming SMS from ${from} to ${to}: ${body}`);
     
-    // Get TheLeadChat business info (hardcoded for now)
-    const businessInfo = {
-        name: 'TheLeadChat',
-        services: 'AI Receptionist, Lead Capture, Appointment Booking',
-        areas: 'Charlotte, NC and surrounding areas',
-        unique: '24/7 AI that never misses a lead'
-    };
+    let businessInfo;
+    let userId;
+    let knowledgeBase = [];
     
-    // Generate AI response
-    const aiResponse = getSmartFallback(businessInfo, body);
-    
-    // Send response via Twilio
-    const twiml = `<?xml version="1.0" encoding="UTF-8"?>
+    try {
+        // Find the user by their Twilio number
+        if (mongoose.connection.readyState === 1) {
+            const user = await User.findOne({ twilioNumber: to });
+            if (user) {
+                userId = user._id.toString();
+                businessInfo = {
+                    name: user.businessName || 'My Business',
+                    services: user.services || '',
+                    areas: user.areas || '',
+                    unique: user.unique || '',
+                    offers: user.offers || '',
+                    openingMessage: user.openingMessage || '',
+                    conversationGoal: user.conversationGoal || 'answer_questions',
+                    calendlyLink: user.calendlyLink || ''
+                };
+                
+                // Load user's knowledge base
+                knowledgeBase = await KnowledgeBase.find({ userId: userId });
+                console.log(`📱 Routing SMS to user: ${user.businessName} (${knowledgeBase.length} KB entries)`);
+            }
+        }
+        
+        // Fallback if user not found
+        if (!businessInfo) {
+            console.log('User not found, using default');
+            businessInfo = {
+                name: 'TheLeadChat',
+                services: 'AI Receptionist, Lead Capture, Appointment Booking',
+                areas: 'Charlotte, NC and surrounding areas',
+                unique: '24/7 AI that never misses a lead'
+            };
+        }
+        
+        // Try to find answer in knowledge base first
+        const lowerMessage = body.toLowerCase();
+        let foundAnswer = null;
+        
+        for (const kb of knowledgeBase) {
+            const kbQuestion = kb.question.toLowerCase();
+            const keywords = kbQuestion.split(' ').filter(w => w.length > 3);
+            const matchCount = keywords.filter(k => lowerMessage.includes(k)).length;
+            
+            if (matchCount >= 2 || kbQuestion.includes(lowerMessage.substring(0, 10))) {
+                foundAnswer = kb.answer;
+                break;
+            }
+        }
+        
+        let aiResponse;
+        if (foundAnswer) {
+            aiResponse = foundAnswer;
+        } else {
+            // Use MiniMax AI for responses
+            try {
+                aiResponse = await getMiniMaxResponse(businessInfo, body, knowledgeBase);
+            } catch (e) {
+                console.error('MiniMax error, using fallback:', e.message);
+                aiResponse = getSmartFallback(businessInfo, body);
+            }
+        }
+        
+        // Send response via Twilio
+        const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
     <Message>${aiResponse}</Message>
 </Response>`;
-    
-    res.type('text/xml');
-    res.send(twiml);
+        
+        res.type('text/xml');
+        res.send(twiml);
+        
+    } catch (error) {
+        console.error('SMS handling error:', error);
+        const errorTwiml = `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Message>Thanks for reaching out! We'll get back to you shortly.</Message>
+</Response>`;
+        res.type('text/xml');
+        res.send(errorTwiml);
+    }
 });
 
 // Serve demo widget page
