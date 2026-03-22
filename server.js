@@ -41,7 +41,7 @@ const PRICING_PLANS = {
     starter: {
         name: 'Starter',
         price: 59,
-        priceId: 'starter_plan',  // Stripe lookup_key
+        priceId: 'price_1TDfdbBOBGfZXbEsqHLFBAzS',  // Stripe price ID
         features: [
             '1 phone number',
             '100 AI responses/month',
@@ -52,7 +52,7 @@ const PRICING_PLANS = {
     professional: {
         name: 'Pro',
         price: 97,
-        priceId: 'pro_plan',  // Stripe lookup_key
+        priceId: 'price_1TDfdhBOBGfZXbEsUv25JtaH',  // Stripe price ID
         features: [
             '3 phone numbers',
             'Unlimited AI responses',
