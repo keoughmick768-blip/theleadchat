@@ -41,7 +41,7 @@ const PRICING_PLANS = {
     starter: {
         name: 'Starter',
         price: 59,
-        priceId: process.env.STRIPE_PRICE_STARTER || 'price_starter',
+        priceId: 'starter_plan',  // Stripe lookup_key
         features: [
             '1 phone number',
             '100 AI responses/month',
@@ -52,7 +52,7 @@ const PRICING_PLANS = {
     professional: {
         name: 'Pro',
         price: 97,
-        priceId: process.env.STRIPE_PRICE_PROFESSIONAL || 'price_professional',
+        priceId: 'pro_plan',  // Stripe lookup_key
         features: [
             '3 phone numbers',
             'Unlimited AI responses',
@@ -587,17 +587,7 @@ app.post('/api/stripe/create-checkout-session', authenticateToken, async (req, r
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: [{
-                price_data: {
-                    currency: 'usd',
-                    product_data: {
-                        name: `TheLeadChat - ${plan.name}`,
-                        description: `AI Receptionist - ${plan.name} Plan`
-                    },
-                    unit_amount: plan.price * 100, // cents
-                    recurring: {
-                        interval: 'month'
-                    }
-                },
+                price: plan.priceId,  // Use lookup_key from pricing plan
                 quantity: 1
             }],
             mode: 'subscription',
