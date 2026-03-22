@@ -983,7 +983,7 @@ function getSmartFallback(businessInfo, userMessage) {
     // TheLeadChat-specific responses (Mick's SaaS business)
     if (isTheLeadChat) {
         const theleadchatPatterns = [
-            { keywords: ['price', 'cost', 'how much', 'charge', 'fee', 'pricing'], response: `We have two plans: Starter at $59/month (1 phone number, 100 AI responses/month, basic widget) and Professional at $79/month (3 phone numbers, unlimited AI, calendar integration, priority support). Which one interests you?` },
+            { keywords: ['price', 'cost', 'how much', 'charge', 'fee', 'pricing'], response: `We have two plans: Starter at $59/month (1 phone number, 100 AI responses/month, basic widget) and Professional at $97/month (3 phone numbers, unlimited AI, calendar integration, priority support). Which one interests you?` },
             { keywords: ['sign up', 'register', 'signup', 'get started', 'create account'], response: `You can sign up right now at theleadchat.com! Just click 'Get Started', enter your email and business name, and you'll be up and running in minutes. Want me to send you the link?` },
             { keywords: ['what do you do', 'what is', 'how does it work', 'services'], response: `TheLeadChat is an AI receptionist that never misses a lead! When customers call or text your business, we answer immediately with AI, capture their info, answer questions, and can even book appointments - 24/7!` },
             { keywords: ['phone number', 'toll free', 'get a number', 'own number'], response: `When you sign up, we automatically provision a toll-free phone number for your business. Your customers call and text that number and our AI handles everything!` },
@@ -1045,7 +1045,7 @@ async function getMiniMaxResponse(businessInfo, userMessage, knowledgeBase = [])
     if (isTheLeadChat) {
         theleadchatInfo = `
 IMPORTANT - You represent TheLeadChat SaaS:
-- Pricing: Starter $59/mo (1 phone#, 100 AI responses), Professional $79/mo (3 phone#, unlimited AI, calendar)
+- Pricing: Starter $59/mo (1 phone#, 100 AI responses), Professional $97/mo (3 phone#, unlimited AI, calendar)
 - Sign up at theleadchat.com
 - It's an AI receptionist that never misses leads - answers calls/texts 24/7
 - Automatically texts back missed calls
