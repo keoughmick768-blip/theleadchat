@@ -1445,6 +1445,64 @@ function saveLeads(leads) {
     fs.writeFileSync(LEADS_FILE, JSON.stringify(leads, null, 2));
 }
 
+// Bot detection function - analyzes if a message appears to be from a chatbot
+function detectBotResponse(message) {
+    if (!message) return false;
+    const msg = message.toLowerCase();
+    
+    // Bot detection patterns
+    const botPatterns = [
+        // Generic chatbot phrases
+        'thank you for reaching out',
+        'we have received your message',
+        'our team will get back to you',
+        'please allow us',
+        'we appreciate your interest',
+        'visit our website for more',
+        'click the link below',
+        'our business hours are',
+        'we are currently away',
+        'auto-reply',
+        'this is an automatic response',
+        'do not reply to this email',
+        // Marketing chatbot specific
+        'we offer',
+        'our services include',
+        'get a quote today',
+        'contact us at',
+        'fill out the form',
+        // Generic template responses
+        'great question',
+        'happy to help',
+        'let me connect you',
+        'one of our',
+        'representative will',
+        // Missing personalization (signs of template)
+        'dear customer',
+        'dear client',
+        'valued customer',
+    ];
+    
+    let botScore = 0;
+    for (const pattern of botPatterns) {
+        if (msg.includes(pattern)) {
+            botScore++;
+        }
+    }
+    
+    // Also check for unnatural patterns
+    if (msg.length < 20 && (msg.includes('thank') || msg.includes('yes') || msg.includes('no'))) {
+        botScore += 1;
+    }
+    
+    // All uppercase could indicate bot
+    if (message === message.toUpperCase() && message.length > 10) {
+        botScore += 1;
+    }
+    
+    return botScore >= 2;
+}
+
 // API: Twilio webhook for incoming SMS
 app.post('/api/webhook/twilio', express.urlencoded({ extended: false }), async (req, res) => {
     const { From, Body } = req.body;
@@ -1462,9 +1520,38 @@ app.post('/api/webhook/twilio', express.urlencoded({ extended: false }), async (
             source: 'sms',
             createdAt: new Date().toISOString(),
             messages: [],
-            converted: false
+            converted: false,
+            status: 'new'
         };
         leads.push(lead);
+    }
+    
+    // Check if lead is already disqualified - if so, don't respond
+    if (lead.status === 'disqualified') {
+        console.log(`Lead ${From} is disqualified - not responding`);
+        res.type('text/xml');
+        res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Message></Message>
+</Response>`);
+        return;
+    }
+    
+    // Detect if incoming message is from a chatbot/bot
+    if (Body && detectBotResponse(Body)) {
+        console.log(`🤖 Bot detected from ${From}! Disqualifying lead.`);
+        lead.status = 'disqualified';
+        lead.disqualifiedAt = new Date().toISOString();
+        lead.disqualifiedReason = 'bot_detected';
+        saveLeads(leads);
+        
+        // Don't send any response to bot
+        res.type('text/xml');
+        res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Message></Message>
+</Response>`);
+        return;
     }
     
     // Save user's message
@@ -1474,24 +1561,52 @@ app.post('/api/webhook/twilio', express.urlencoded({ extended: false }), async (
         timestamp: new Date().toISOString()
     });
     
-    // Generate AI response
+    // Generate AI response using MiniMax (with fallback to Ollama)
     let aiResponse;
     try {
-        const systemPrompt = `You are a helpful assistant for a business. 
+        // Try MiniMax first
+        const minimaxKey = process.env.MINIMAX_API_KEY;
+        if (minimaxKey) {
+            const systemPrompt = `You are a helpful assistant for a business. 
 Be friendly and professional. Help the customer with their inquiry.`;
-        
-        const response = await axios.post(`${OLLAMA_URL}/api/chat`, {
-            model: 'qwen3-coder:30b',
-            messages: [
-                { role: 'system', content: systemPrompt },
-                ...lead.messages.slice(-10)
-            ],
-            stream: false
-        });
-        
-        aiResponse = response.data.message.content;
+            
+            const response = await axios.post('https://api.minimax.chat/v1/text/chatcompletion_v2', {
+                model: 'abab6.5s-chat',
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    ...lead.messages.slice(-10).map(m => ({ role: m.role, content: m.content }))
+                ],
+                headers: {
+                    'Authorization': `Bearer ${minimaxKey}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            aiResponse = response.data.choices?.[0]?.message?.content || response.data.reply;
+            console.log('MiniMax response generated');
+        } else {
+            throw new Error('No MiniMax key');
+        }
     } catch (error) {
-        aiResponse = "Thanks for your message! We'll get back to you shortly.";
+        // Fallback to Ollama
+        console.log('Falling back to Ollama...');
+        try {
+            const systemPrompt = `You are a helpful assistant for a business. 
+Be friendly and professional. Help the customer with their inquiry.`;
+            
+            const response = await axios.post(`${OLLAMA_URL}/api/chat`, {
+                model: 'qwen3-coder:30b',
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    ...lead.messages.slice(-10)
+                ],
+                stream: false
+            });
+            
+            aiResponse = response.data.message.content;
+        } catch (ollamaError) {
+            aiResponse = "Thanks for your message! We'll get back to you shortly.";
+        }
     }
     
     // Save AI response
@@ -1589,10 +1704,50 @@ app.put('/api/leads/:id/convert', authenticateToken, (req, res) => {
     if (lead) {
         lead.converted = true;
         lead.convertedAt = new Date().toISOString();
+        lead.status = 'converted';
         saveLeads(leads);
     }
     
     res.json({ success: true, lead });
+});
+
+// API: Mark lead as disqualified (bot/not interested/manual)
+app.put('/api/leads/:id/disqualify', authenticateToken, (req, res) => {
+    let leads = loadLeads();
+    const lead = leads.find(l => l.id === req.params.id);
+    const { reason } = req.body;
+    
+    if (lead) {
+        lead.converted = false;
+        lead.status = 'disqualified';
+        lead.disqualifiedAt = new Date().toISOString();
+        lead.disqualifiedReason = reason || 'manual_disqualify';
+        saveLeads(leads);
+    }
+    
+    res.json({ success: true, lead });
+});
+
+// API: Re-qualify a disqualified lead
+app.put('/api/leads/:id/requalify', authenticateToken, (req, res) => {
+    let leads = loadLeads();
+    const lead = leads.find(l => l.id === req.params.id);
+    
+    if (lead) {
+        lead.status = 'new';
+        lead.disqualifiedAt = null;
+        lead.disqualifiedReason = null;
+        saveLeads(leads);
+    }
+    
+    res.json({ success: true, lead });
+});
+
+// API: Get leads by status
+app.get('/api/leads/status/:status', authenticateToken, (req, res) => {
+    const leads = loadLeads();
+    const filtered = leads.filter(l => l.status === req.params.status);
+    res.json({ leads: filtered });
 });
 
 // =======================
