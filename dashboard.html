@@ -3,60 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | TheLeadChat</title>
+    <title>Dashboard - TheLeadChat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
         :root {
-            --primary: #10b981;
-            --primary-dark: #059669;
-            --bg-dark: #0f0f23;
-            --bg-card: #1e293b;
-            --bg-card-hover: #283548;
-            --text: #f8fafc;
-            --text-muted: #94a3b8;
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #0f172a;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
         body {
-            font-family: 'Inter', system-ui, sans-serif;
-            background: var(--bg-dark);
+            font-family: 'Outfit', sans-serif;
+            background: var(--background);
             color: var(--text);
             min-height: 100vh;
         }
         
-        /* Header */
-        .header {
-            background: rgba(15, 15, 35, 0.95);
-            backdrop-filter: blur(20px);
-            padding: 16px 0;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 100;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+        /* Layout */
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
         }
         
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--secondary);
+            color: white;
+            padding: 1.5rem 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+        }
+        
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0 1.5rem 2rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 1.5rem;
+        }
+        
+        .sidebar-logo-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--primary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+        
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .nav-section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: rgba(255,255,255,0.5);
+            padding: 0 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        
+        .nav-link span {
+            font-size: 1.25rem;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 2rem;
+        }
+        
+        /* Header */
+        .page-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 2rem;
         }
         
-        .logo {
-            font-size: 1.3rem;
+        .page-header h1 {
+            font-size: 1.75rem;
             font-weight: 700;
-            color: var(--primary);
         }
-        
-        .logo span { color: white; }
         
         .user-menu {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 1rem;
         }
         
         .user-avatar {
@@ -67,956 +141,986 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            color: white;
             font-weight: 600;
         }
         
-        /* Layout */
-        .layout {
-            display: flex;
-            padding-top: 72px;
-            min-height: 100vh;
-        }
-        
-        /* Sidebar */
-        .sidebar {
-            width: 260px;
-            background: var(--bg-card);
-            padding: 24px 16px;
-            border-right: 1px solid rgba(255,255,255,0.1);
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-        }
-        
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px 16px;
-            color: var(--text-muted);
-            text-decoration: none;
-            border-radius: 10px;
-            margin-bottom: 4px;
-            transition: all 0.2s;
-        }
-        
-        .nav-item:hover, .nav-item.active {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--primary);
-        }
-        
-        .nav-item.active {
-            background: var(--primary);
-            color: white;
-        }
-        
-        .nav-icon {
-            font-size: 1.2rem;
-            width: 24px;
-            text-align: center;
-        }
-        
-        /* Main */
-        .main {
-            flex: 1;
-            margin-left: 260px;
-            padding: 32px;
-        }
-        
-        .page-title {
-            font-size: 1.75rem;
-            margin-bottom: 8px;
-        }
-        
-        .page-subtitle {
-            color: var(--text-muted);
-            margin-bottom: 32px;
-        }
-        
-        /* Stats */
+        /* Stats Grid */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 40px;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
         }
         
         .stat-card {
-            background: var(--bg-card);
-            padding: 24px;
+            background: var(--surface);
+            padding: 1.5rem;
             border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--primary);
+            border: 1px solid var(--border);
         }
         
         .stat-label {
-            color: var(--text-muted);
-            font-size: 0.9rem;
+            font-size: 0.875rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
         }
         
-        /* Cards */
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        
+        .stat-change {
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+        
+        .stat-change.positive {
+            color: var(--success);
+        }
+        
+        /* Card */
         .card {
-            background: var(--bg-card);
-            padding: 28px;
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.05);
-            margin-bottom: 24px;
+            background: var(--surface);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
         }
         
         .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
         }
         
-        .card-title {
-            font-size: 1.1rem;
+        .card-header h2 {
+            font-size: 1.125rem;
             font-weight: 600;
         }
         
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        /* Table */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .table th, .table td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .table th {
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .table tr:hover {
+            background: var(--background);
+        }
+        
+        /* Status Badge */
         .status-badge {
-            background: rgba(16, 185, 129, 0.2);
-            color: var(--primary);
-            padding: 6px 14px;
+            display: inline-flex;
+            align-items: center;
+            padding: 0.375rem 0.75rem;
             border-radius: 20px;
-            font-size: 0.85rem;
+            font-size: 0.8125rem;
             font-weight: 500;
         }
         
-        .status-badge.inactive {
-            background: rgba(239, 68, 68, 0.2);
-            color: #ef4444;
+        .status-badge.new {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
         }
         
-        /* Info List */
-        .info-list {
-            display: grid;
-            gap: 16px;
+        .status-badge.qualified {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
         }
         
-        .info-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 14px 18px;
-            background: var(--bg-dark);
-            border-radius: 10px;
+        .status-badge.appointment {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
         }
         
-        .info-label {
-            color: var(--text-muted);
-        }
-        
-        .info-value {
-            font-weight: 500;
-        }
-        
-        /* Chat Preview */
-        .chat-preview {
-            background: var(--bg-dark);
-            border-radius: 16px;
-            padding: 20px;
-            max-width: 350px;
-        }
-        
-        .chat-messages {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        
-        .msg {
-            padding: 12px 16px;
-            border-radius: 14px;
-            max-width: 85%;
-            font-size: 0.9rem;
-        }
-        
-        .msg.in {
-            background: var(--bg-card);
-            align-self: flex-start;
-            border-bottom-left-radius: 4px;
-        }
-        
-        .msg.out {
-            background: var(--primary);
-            align-self: flex-end;
-            border-bottom-right-radius: 4px;
+        .status-badge.closed {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
         }
         
         /* Buttons */
         .btn {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            background: var(--primary);
-            color: white;
-            padding: 12px 24px;
+            gap: 0.5rem;
+            padding: 0.625rem 1rem;
             border-radius: 10px;
             font-weight: 600;
             text-decoration: none;
-            border: none;
-            cursor: pointer;
             transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+            font-size: 0.9375rem;
+            font-family: inherit;
         }
         
-        .btn:hover {
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
             background: var(--primary-dark);
         }
         
-        .btn-outline {
-            background: transparent;
-            border: 2px solid var(--primary);
-        }
-        
         .btn-sm {
-            padding: 8px 16px;
-            font-size: 0.9rem;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8125rem;
         }
         
-        /* Settings Form */
-        .form-group {
-            margin-bottom: 20px;
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-light);
         }
         
-        .form-group label {
-            display: block;
-            font-size: 0.9rem;
-            margin-bottom: 8px;
-            color: var(--text-muted);
-        }
-        
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px 16px;
-            background: var(--bg-dark);
-            border: 2px solid rgba(255,255,255,0.1);
-            border-radius: 10px;
+        .btn-ghost:hover {
+            background: var(--background);
             color: var(--text);
-            font-size: 1rem;
         }
         
-        .form-group input:focus,
-        .form-group textarea:focus {
+        /* Forms */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+        
+        .form-input:focus {
             outline: none;
             border-color: var(--primary);
         }
         
-        .form-group textarea {
-            min-height: 80px;
+        /* Login Form */
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--background);
+            padding: 2rem;
         }
         
-        /* Test Chat */
-        .test-area {
+        .auth-card {
+            background: var(--surface);
+            padding: 2.5rem;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            width: 100%;
+            max-width: 420px;
+        }
+        
+        .auth-logo {
             display: flex;
-            gap: 20px;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+        }
+        
+        .auth-logo-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--primary);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .auth-title {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .auth-subtitle {
+            text-align: center;
+            color: var(--text-light);
+            margin-bottom: 2rem;
+        }
+        
+        .auth-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--text-light);
+        }
+        
+        .auth-footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+        
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        
+        .empty-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .empty-text {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+        }
+        
+        /* Tab Navigation */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+        
+        .tab {
+            padding: 0.75rem 1.25rem;
+            font-weight: 500;
+            color: var(--text-light);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .tab:hover {
+            color: var(--text);
+        }
+        
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Phone Number Display */
+        .phone-number {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--background);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 1rem;
+        }
+        
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: 1rem;
             flex-wrap: wrap;
         }
         
-        .test-input {
-            flex: 1;
-            min-width: 300px;
-        }
-        
-        .test-input input {
-            width: 100%;
-            padding: 14px 18px;
-            background: var(--bg-dark);
-            border: 2px solid rgba(255,255,255,0.1);
-            border-radius: 10px;
-            color: var(--text);
-            font-size: 1rem;
-        }
-        
-        .test-input input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-        
-        .test-response {
-            background: var(--bg-dark);
-            padding: 20px;
-            border-radius: 12px;
-            margin-top: 16px;
-            min-height: 60px;
-        }
-        
-        .test-response.loading {
+        .quick-action {
             display: flex;
             align-items: center;
-            gap: 8px;
-            color: var(--text-muted);
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.2s;
         }
         
-        .dot {
-            width: 8px;
-            height: 8px;
-            background: var(--text-muted);
-            border-radius: 50%;
-            animation: bounce 1.4s infinite ease-in-out;
+        .quick-action:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
         }
         
-        .dot:nth-child(1) { animation-delay: -0.32s; }
-        .dot:nth-child(2) { animation-delay: -0.16s; }
-        
-        @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1); }
+        .quick-action-icon {
+            font-size: 1.5rem;
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-content">
-            <div class="logo">Missed<span>Call</span>AI</div>
-            <div class="user-menu">
-                <div class="user-avatar" id="userAvatar">JD</div>
+    <!-- Auth Layout (shown if not logged in) -->
+    <div class="auth-container" id="authLayout">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <div class="auth-logo-icon">🏠</div>
+                TheLeadChat
+            </div>
+            <h2 class="auth-title">Welcome back</h2>
+            <p class="auth-subtitle">Sign in to your account</p>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="email" placeholder="you@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-input" id="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Sign In</button>
+            </form>
+            
+            <div class="auth-footer">
+                <p>Don't have an account? <a href="/signup">Sign up</a></p>
             </div>
         </div>
-    </header>
-    
-    <div class="layout">
-        <!-- Sidebar -->
-        <nav class="sidebar">
-            <a href="#" class="nav-item active">
-                <span class="nav-icon">📊</span>
-                Dashboard
-            </a>
-            <a href="#settings" class="nav-item">
-                <span class="nav-icon">⚙️</span>
-                Settings
-            </a>
-            <a href="#conversations" class="nav-item">
-                <span class="nav-icon">💬</span>
-                Conversations
-            </a>
-            <a href="#leads" class="nav-item">
-                <span class="nav-icon">👥</span>
-                Missed Calls
-            </a>
-            <a href="#trainAI" class="nav-item">
-                <span class="nav-icon">🧠</span>
-                Train Your AI
-            </a>
-            <a href="#support" class="nav-item">
-                <span class="nav-icon">❓</span>
-                FAQ
-            </a>
-            <a href="#support" class="nav-item">
-                <span class="nav-icon">📧</span>
-                Contact Support
-            </a>
-            <a href="index.html" class="nav-item" style="margin-top: auto;">
-                <span class="nav-icon">🚪</span>
-                Logout
-            </a>
-        </nav>
-        
-        <!-- Main -->
-        <main class="main">
-            <h1 class="page-title">Dashboard</h1>
-            <p class="page-subtitle" id="welcomeText">Welcome back! Here's how your business is doing.</p>
-            
-            <!-- Stats -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value" id="missedCalls">0</div>
-                    <div class="stat-label">Missed Calls This Month</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="repliesSent">0</div>
-                    <div class="stat-label">Auto-Replies Sent</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="leadsCaptured">0</div>
-                    <div class="stat-label">Leads Captured</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="conversations">0</div>
-                    <div class="stat-label">Active Conversations</div>
-                </div>
-            </div>
-            
-            <!-- Status Card -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">🤖 AI Assistant Status</h3>
-                    <span class="status-badge" id="statusBadge">Active</span>
-                </div>
-                
-                <div class="info-list">
-                    <div class="info-item">
-                        <span class="info-label">Phone Number</span>
-                        <span class="info-value" id="phoneNumber">-</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Business</span>
-                        <span class="info-value" id="businessName">-</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Services</span>
-                        <span class="info-value" id="services">-</span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Test AI -->
-            <div class="card" id="settings">
-                <div class="card-header">
-                    <h3 class="card-title">🧪 Test Your AI</h3>
-                </div>
-                
-                <p style="color: var(--text-muted); margin-bottom: 16px;">See how your AI responds to customer questions.</p>
-                
-                <div class="test-area">
-                    <div class="test-input">
-                        <input type="text" id="testMessage" placeholder="Type a test message (e.g., 'What services do you offer?')">
-                    </div>
-                    <button type="button" class="btn" onclick="testAI()">Send Test</button>
-                </div>
-                
-                <div class="test-response" id="testResponse">
-                    <strong>Response will appear here...</strong>
-                </div>
-            </div>
-            
-            <!-- Business Info -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">✏️ Edit Business Info</h3>
-                    <button class="btn btn-sm" onclick="saveSettings()">Save Changes</button>
-                </div>
-                
-                <div class="form-group">
-                    <label>Website (optional)</label>
-                    <input type="text" id="editWebsite" placeholder="https://yourwebsite.com">
-                </div>
-                
-                <div class="form-group">
-                    <label>Services You Offer</label>
-                    <textarea id="editServices" placeholder="e.g., Real estate, Home cleaning, Plumbing..."></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label>Areas You Serve</label>
-                    <input type="text" id="editAreas" placeholder="e.g., Charlotte NC, Lake Norman">
-                </div>
-                
-                <div class="form-group">
-                    <label>What Makes You Unique</label>
-                    <textarea id="editUnique" placeholder="e.g., Family owned, 20+ years experience, Free estimates"></textarea>
-                </div>
-            </div>
+    </div>
 
-            <!-- AI Conversation Settings -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">🤖 AI Conversation Settings</h3>
-                </div>
-                
-                <div class="form-group">
-                    <label>Opening Message</label>
-                    <textarea id="editOpeningMessage" placeholder="e.g., Hi! Thanks for reaching out. How can I help you today?" style="min-height: 80px;"></textarea>
-                    <small style="color: var(--text-muted);">The first message the AI sends when a conversation starts</small>
-                </div>
-                
-                <div class="form-group">
-                    <label>Conversation Goal</label>
-                    <select id="editConversationGoal" style="width: 100%; padding: 12px; background: var(--bg-dark); border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; color: white;">
-                        <option value="answer_questions">Answer Questions</option>
-                        <option value="book_appointment">Book Appointment</option>
-                        <option value="collect_info">Collect Contact Information</option>
-                        <option value="provide_info">Provide Information Only</option>
-                    </select>
-                    <small style="color: var(--text-muted);">What the AI should aim to achieve in conversations</small>
-                </div>
+    <!-- Dashboard Layout (shown when logged in) -->
+    <div class="app-layout" id="dashboardLayout" style="display: none;">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">🏠</div>
+                TheLeadChat
             </div>
             
-            <!-- Calendar Connection Section -->
-            <div class="card" id="calendar">
-                <div class="card-header">
-                    <h3 class="card-title">📅 Calendar Connection</h3>
-                    <span class="status-badge" id="calendarStatus">Not Connected</span>
+            <div class="nav-section">
+                <div class="nav-section-title">Main</div>
+                <a href="#overview" class="nav-link active" data-page="overview">
+                    <span>📊</span> Overview
+                </a>
+                <a href="#leads" class="nav-link" data-page="leads">
+                    <span>👥</span> Leads
+                </a>
+                <a href="#properties" class="nav-link" data-page="properties">
+                    <span>🏠</span> Properties
+                </a>
+                <a href="#calendar" class="nav-link" data-page="calendar">
+                    <span>📅</span> Calendar
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Tools</div>
+                <a href="#knowledge" class="nav-link" data-page="knowledge">
+                    <span>🧠</span> Knowledge Base
+                </a>
+                <a href="#marketing" class="nav-link" data-page="marketing">
+                    <span>📱</span> Marketing
+                </a>
+                <a href="#analytics" class="nav-link" data-page="analytics">
+                    <span>📈</span> Analytics
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Account</div>
+                <a href="#settings" class="nav-link" data-page="settings">
+                    <span>⚙️</span> Settings
+                </a>
+                <a href="#" class="nav-link" id="logoutBtn">
+                    <span>🚪</span> Log Out
+                </a>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Overview Page -->
+            <div id="page-overview" class="page-content">
+                <div class="page-header">
+                    <h1>Dashboard</h1>
+                    <div class="user-menu">
+                        <div class="user-avatar" id="userAvatar">M</div>
+                    </div>
                 </div>
                 
-                <p style="color: var(--text-muted); margin-bottom: 24px;">Connect your calendar to let AI book appointments automatically!</p>
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Leads</div>
+                        <div class="stat-value" id="statTotalLeads">0</div>
+                        <div class="stat-change positive">This month</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">New Leads</div>
+                        <div class="stat-value" id="statNewLeads">0</div>
+                        <div class="stat-change">Awaiting response</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Qualified</div>
+                        <div class="stat-value" id="statQualified">0</div>
+                        <div class="stat-change positive">Ready to show</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Appointments</div>
+                        <div class="stat-value" id="statAppointments">0</div>
+                        <div class="stat-change">Scheduled</div>
+                    </div>
+                </div>
                 
-                <div style="display: grid; gap: 16px;">
-                    <div class="calendar-option" style="background: var(--bg-dark); padding: 20px; border-radius: 12px; border: 2px solid transparent;" id="cal-google">
-                        <div style="display: flex; align-items: center; gap: 16px;">
-                            <div style="font-size: 2rem;">📆</div>
-                            <div>
-                                <h4>Google Calendar</h4>
-                                <p style="color: var(--text-muted); font-size: 0.9rem;">Connect your Google Calendar</p>
+                <!-- Quick Actions -->
+                <div class="quick-actions" style="margin-bottom: 2rem;">
+                    <a href="#add-lead" class="quick-action" id="addLeadBtn">
+                        <div class="quick-action-icon">➕</div>
+                        <div>
+                            <strong>Add Lead</strong>
+                            <div style="font-size: 0.8125rem; color: var(--text-light);">Manual entry</div>
+                        </div>
+                    </a>
+                    <a href="#properties" class="quick-action">
+                        <div class="quick-action-icon">🏠</div>
+                        <div>
+                            <strong>Add Property</strong>
+                            <div style="font-size: 0.8125rem; color: var(--text-light);">List a home</div>
+                        </div>
+                    </a>
+                    <a href="#marketing" class="quick-action">
+                        <div class="quick-action-icon">📱</div>
+                        <div>
+                            <strong>SMS Campaign</strong>
+                            <div style="font-size: 0.8125rem; color: var(--text-light);">Market to leads</div>
+                        </div>
+                    </a>
+                </div>
+                
+                <!-- Phone Numbers -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Your Phone Numbers</h2>
+                        <button class="btn btn-primary btn-sm">Add Number</button>
+                    </div>
+                    <div class="card-body">
+                        <div id="phoneNumbers">
+                            <div class="empty-state">
+                                <div class="empty-icon">📱</div>
+                                <div class="empty-title">No phone numbers</div>
+                                <div class="empty-text">Add a number to start receiving calls and texts</div>
+                                <button class="btn btn-primary">Get a Number</button>
                             </div>
                         </div>
-                        <button type="button" class="btn btn-sm" style="margin-top: 12px;" onclick="connectCalendar('google')">Connect</button>
                     </div>
-                    
-                    <div class="calendar-option" style="background: var(--bg-dark); padding: 20px; border-radius: 12px; border: 2px solid transparent;" id="cal-calendly">
-                        <div style="display: flex; align-items: center; gap: 16px;">
-                            <div style="font-size: 2rem;">📅</div>
-                            <div>
-                                <h4>Calendly</h4>
-                                <p style="color: var(--text-muted); font-size: 0.9rem;">Enter your Calendly link</p>
+                </div>
+                
+                <!-- Recent Leads -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Recent Leads</h2>
+                        <a href="#leads" class="btn btn-ghost btn-sm">View All</a>
+                    </div>
+                    <div class="card-body" style="padding: 0;">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Source</th>
+                                    <th>Status</th>
+                                    <th>Added</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="leadsTable">
+                                <tr>
+                                    <td colspan="5" style="text-align: center; color: var(--text-light); padding: 3rem;">
+                                        No leads yet. Add your first lead!
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Leads Page -->
+            <div id="page-leads" class="page-content" style="display: none;">
+                <div class="page-header">
+                    <h1>Leads</h1>
+                    <button class="btn btn-primary" id="addLeadBtn2">Add Lead</button>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="tabs">
+                            <div class="tab active" data-filter="all">All</div>
+                            <div class="tab" data-filter="new">New</div>
+                            <div class="tab" data-filter="qualified">Qualified</div>
+                            <div class="tab" data-filter="appointment">Appointments</div>
+                            <div class="tab" data-filter="closed">Closed</div>
+                        </div>
+                    </div>
+                    <div class="card-body" style="padding: 0;">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Contact</th>
+                                    <th>Source</th>
+                                    <th>Status</th>
+                                    <th>Added</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leadsTableFull">
+                                <tr>
+                                    <td colspan="6" style="text-align: center; color: var(--text-light); padding: 3rem;">
+                                        No leads yet
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Properties Page -->
+            <div id="page-properties" class="page-content" style="display: none;">
+                <div class="page-header">
+                    <h1>Properties</h1>
+                    <button class="btn btn-primary" id="addPropertyBtn">Add Property</button>
+                </div>
+                
+                <div class="card">
+                    <div class="card-body">
+                        <div id="propertiesList">
+                            <div class="empty-state">
+                                <div class="empty-icon">🏠</div>
+                                <div class="empty-title">No properties</div>
+                                <div class="empty-text">Add your listings so AI can answer questions about them</div>
+                                <button class="btn btn-primary" id="addPropertyBtn2">Add First Property</button>
                             </div>
                         </div>
-                        <div style="margin-top: 12px;">
-                            <input type="text" id="calendlyLink" placeholder="https://calendly.com/yourname" style="width: 100%; padding: 12px; background: var(--bg-dark); border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; color: white;">
-                            <button type="button" class="btn btn-sm" style="margin-top: 8px;" onclick="saveCalendly()">Save</button>
-                        </div>
                     </div>
-                    
-                    <div class="calendar-option" style="background: var(--bg-dark); padding: 20px; border-radius: 12px; border: 2px solid transparent;" id="cal-ghl">
-                        <div style="display: flex; align-items: center; gap: 16px;">
-                            <div style="font-size: 2rem;">🏢</div>
-                            <div>
-                                <h4>GoHighLevel</h4>
-                                <p style="color: var(--text-muted); font-size: 0.9rem;">Connect your GHL calendar</p>
+                </div>
+            </div>
+            
+            <!-- Settings Page -->
+            <div id="page-settings" class="page-content" style="display: none;">
+                <div class="page-header">
+                    <h1>Settings</h1>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Profile</h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="settingsForm">
+                            <div class="form-group">
+                                <label class="form-label">Business Name</label>
+                                <input type="text" class="form-input" id="settingBusinessName">
                             </div>
+                            <div class="form-group">
+                                <label class="form-label">Your Name</label>
+                                <input type="text" class="form-input" id="settingOwnerName">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Phone (for call forwarding)</label>
+                                <input type="tel" class="form-input" id="settingPhone">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Website</label>
+                                <input type="url" class="form-input" id="settingWebsite">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Realtor Info</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">License Number</label>
+                            <input type="text" class="form-input" id="settingLicense">
                         </div>
-                        <button type="button" class="btn btn-sm" style="margin-top: 12px;" onclick="connectCalendar('ghl')">Connect</button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Train Your AI Section -->
-            <div class="card" id="trainAI">
-                <div class="card-header">
-                    <h3 class="card-title">🧠 Train Your AI</h3>
-                    <span class="status-badge" id="trainAIBadge">Ready</span>
-                </div>
-                
-                <p style="color: var(--text-muted); margin-bottom: 20px;">
-                    Teach your AI to answer common questions. Add Q&A pairs that the AI will use to answer customer questions.
-                </p>
-                
-                <!-- Add Q&A Form -->
-                <div style="background: var(--bg-dark); padding: 20px; border-radius: 12px; margin-bottom: 24px;">
-                    <h4 style="margin-bottom: 16px;">➕ Add New Q&A</h4>
-                    <div class="form-group">
-                        <label>Question (what customers might ask)</label>
-                        <input type="text" id="qaQuestion" placeholder="e.g., What are your hours?">
-                    </div>
-                    <div class="form-group">
-                        <label>Answer</label>
-                        <textarea id="qaAnswer" placeholder="e.g., We're open Monday-Friday 9am-5pm" style="min-height: 80px;"></textarea>
-                    </div>
-                    <button type="button" class="btn" onclick="addQA()">Add to Knowledge Base</button>
-                </div>
-                
-                <!-- Existing Q&A List -->
-                <div style="margin-bottom: 24px;">
-                    <h4 style="margin-bottom: 16px;">📚 Your Q&A Knowledge Base (<span id="qaCount">0</span> pairs)</h4>
-                    <div id="qaList" style="display: grid; gap: 12px;">
-                        <p style="color: var(--text-muted);">Loading...</p>
+                        <div class="form-group">
+                            <label class="form-label">Brokerage</label>
+                            <input type="text" class="form-input" id="settingBrokerage">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Areas Served (comma separated)</label>
+                            <input type="text" class="form-input" id="settingAreas" placeholder="Charlotte, Myers Park, Ballantyne">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Calendly Link</label>
+                            <input type="url" class="form-input" id="settingCalendly" placeholder="https://calendly.com/your-name">
+                        </div>
+                        <button type="submit" class="btn btn-primary" form="settingsForm">Save Changes</button>
                     </div>
                 </div>
                 
-                <!-- Flagged Questions (Need Review) -->
-                <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 24px;">
-                    <h4 style="margin-bottom: 16px; color: #f59e0b;">⚠️ Questions Needing Review (<span id="flaggedCount">0</span>)</h4>
-                    <p style="color: var(--text-muted); margin-bottom: 16px;">
-                        These are questions your AI couldn't answer. Add the correct answer to improve your bot!
-                    </p>
-                    <div id="flaggedList" style="display: grid; gap: 16px;">
-                        <p style="color: var(--text-muted);">No flagged questions - great job!</p>
+                <div class="card">
+                    <div class="card-header">
+                        <h2>AI Settings</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">Opening Message</label>
+                            <textarea class="form-input" id="settingOpening" rows="3" placeholder="Hi! Thanks for contacting us. How can I help?"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Missed Call Message</label>
+                            <textarea class="form-input" id="settingMissedCall" rows="3" placeholder="Hi! You called at a busy time. We'd love to help - reply to schedule a showing!"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" form="settingsForm">Save Changes</button>
                     </div>
                 </div>
-            </div>
-            
-            <!-- FAQ Section -->
-            <div class="card" id="faq">
-                <div class="card-header">
-                    <h3 class="card-title">❓ Frequently Asked Questions</h3>
-                </div>
-                
-                <div class="faq-item" style="margin-bottom: 20px;">
-                    <h4 style="color: var(--primary); margin-bottom: 8px;">How does the missed call auto-reply work?</h4>
-                    <p style="color: var(--text-muted); font-size: 0.95rem;">When a customer calls and you don't answer, our AI automatically sends them a text message within seconds. The message is customized to your business and can answer common questions.</p>
-                </div>
-                
-                <div class="faq-item" style="margin-bottom: 20px;">
-                    <h4 style="color: var(--primary); margin-bottom: 8px;">Do I need Twilio?</h4>
-                    <p style="color: var(--text-muted); font-size: 0.95rem;">Yes, we use Twilio for phone numbers and SMS. It's $1/month for a phone number. We'll help you set it up!</p>
-                </div>
-                
-                <div class="faq-item" style="margin-bottom: 20px;">
-                    <h4 style="color: var(--primary); margin-bottom: 8px;">Can customers book appointments?</h4>
-                    <p style="color: var(--text-muted); font-size: 0.95rem;">Yes! Connect your calendar (Google, Calendly, or GoHighLevel) and customers can book directly through text.</p>
-                </div>
-                
-                <div class="faq-item" style="margin-bottom: 20px;">
-                    <h4 style="color: var(--primary); margin-bottom: 8px;">What happens if I answer the call?</h4>
-                    <p style="color: var(--text-muted); font-size: 0.95rem;">If you answer the call, no auto-reply is sent. Everything works as normal!</p>
-                </div>
-                
-                <div class="faq-item">
-                    <h4 style="color: var(--primary); margin-bottom: 8px;">Can I customize the auto-reply message?</h4>
-                    <p style="color: var(--text-muted); font-size: 0.95rem;">Yes! Go to Settings and edit your business info. The AI will use that information to generate responses.</p>
-                </div>
-            </div>
-            
-            <!-- Contact Support Section -->
-            <div class="card" id="support">
-                <div class="card-header">
-                    <h3 class="card-title">📧 Contact Support</h3>
-                </div>
-                
-                <p style="color: var(--text-muted); margin-bottom: 20px;">Have questions? We're here to help!</p>
-                
-                <div style="background: var(--bg-dark); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
-                    <p style="margin-bottom: 12px;"><strong>📧 Email:</strong> keoughmick768@gmail.com</p>
-                    <p style="margin-bottom: 12px;"><strong>⏰ Response Time:</strong> Within 24 hours</p>
-                    <p><strong>💬 What we can help with:</strong></p>
-                    <ul style="margin-left: 20px; margin-top: 8px; color: var(--text-muted);">
-                        <li>Setup assistance</li>
-                        <li>Troubleshooting</li>
-                        <li>Billing questions</li>
-                        <li>Feature requests</li>
-                    </ul>
-                </div>
-                
-                <a href="mailto:keoughmick768@gmail.com?subject=TheLeadChat%20Support%20Request" class="btn">Send Email</a>
             </div>
         </main>
     </div>
-    
+
+    <!-- Add Lead Modal -->
+    <dialog id="addLeadModal" style="border: none; border-radius: 16px; padding: 0; max-width: 480px; width: 100%;">
+        <div class="card" style="margin: 0;">
+            <div class="card-header">
+                <h2>Add New Lead</h2>
+                <button class="btn btn-ghost btn-sm" onclick="closeModal('addLeadModal')">✕</button>
+            </div>
+            <div class="card-body">
+                <form id="addLeadForm">
+                    <div class="form-group">
+                        <label class="form-label">Name *</label>
+                        <input type="text" class="form-input" id="leadName" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone *</label>
+                        <input type="tel" class="form-input" id="leadPhone" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-input" id="leadEmail">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Budget</label>
+                        <input type="text" class="form-input" id="leadBudget" placeholder="$300k - $500k">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Timeline</label>
+                        <input type="text" class="form-input" id="leadTimeline" placeholder="Within 3 months">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Notes</label>
+                        <textarea class="form-input" id="leadNotes" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Add Lead</button>
+                </form>
+            </div>
+        </div>
+    </dialog>
+
     <script>
-        // Check if logged in
-        const token = localStorage.getItem('TheLeadChat_token');
-        if (!token) {
-            window.location.href = 'login.html';
-        }
+        // API Base URL
+        const API_URL = '';
         
-        // Check if setup is complete
-        const userData = JSON.parse(localStorage.getItem('TheLeadChat_user') || '{}');
-        if (userData.setupComplete === false) {
-            window.location.href = 'setup.html';
-        }
+        // State
+        let currentUser = null;
+        let leads = [];
         
-        if (userData.businessName) {
-            document.getElementById('welcomeText').textContent = `Welcome back, ${userData.ownerName || 'there'}!`;
-            document.getElementById('userAvatar').textContent = (userData.ownerName || 'U').charAt(0).toUpperCase();
-            document.getElementById('phoneNumber').textContent = userData.phone || '-';
-            document.getElementById('businessName').textContent = userData.businessName || '-';
-            document.getElementById('services').textContent = userData.services ? userData.services.split('\n')[0] : '-';
-            document.getElementById('editServices').value = userData.services || '';
-            document.getElementById('editAreas').value = userData.areas || '';
-            document.getElementById('editUnique').value = userData.unique || '';
-            document.getElementById('editWebsite').value = userData.website || '';
-            document.getElementById('editOpeningMessage').value = userData.openingMessage || '';
-            document.getElementById('editConversationGoal').value = userData.conversationGoal || 'answer_questions';
-        } else {
-            // Demo mode - show placeholder data
-            document.getElementById('businessName').textContent = 'Demo Business';
-            document.getElementById('services').textContent = 'Real Estate';
-            document.getElementById('editServices').value = 'Real Estate\nHome Buying\nHome Selling';
-            document.getElementById('editAreas').value = 'Charlotte, NC';
-            document.getElementById('editUnique').value = 'Family owned, 10+ years experience';
-            document.getElementById('editWebsite').value = 'https://example.com';
-            document.getElementById('editOpeningMessage').value = 'Hi! Thanks for reaching out. How can we help you today?';
-            document.getElementById('editConversationGoal').value = 'answer_questions';
-        }
-        
-        // Test AI function
-        async function testAI() {
-            const input = document.getElementById('testMessage').value;
-            const response = document.getElementById('testResponse');
+        // Check auth on load
+        async function checkAuth() {
+            const token = localStorage.getItem('tlc_token');
+            if (!token) {
+                showAuth();
+                return;
+            }
             
-            if (!input) return;
-            
-            response.innerHTML = '<div class="loading"><span class="dot"></span><span class="dot"></span><span class="dot"></span> AI is thinking...</div>';
-            
-            // Try calling the real API
             try {
-                const apiUrl = '/api/chat';
-                const res = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        message: input,
-                        history: [],
-                        business: userData.businessName || 'My Business'
-                    })
+                const res = await fetch(API_URL + '/api/user/me', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                
+                if (!res.ok) throw new Error('Not authenticated');
+                
+                const data = await res.json();
+                currentUser = data.user;
+                showDashboard();
+            } catch (e) {
+                localStorage.removeItem('tlc_token');
+                showAuth();
+            }
+        }
+        
+        function showAuth() {
+            document.getElementById('authLayout').style.display = 'flex';
+            document.getElementById('dashboardLayout').style.display = 'none';
+        }
+        
+        function showDashboard() {
+            document.getElementById('authLayout').style.display = 'none';
+            document.getElementById('dashboardLayout').style.display = 'flex';
+            
+            // Update user info
+            if (currentUser) {
+                document.getElementById('userAvatar').textContent = (currentUser.ownerName || currentUser.businessName || 'U')[0].toUpperCase();
+                document.getElementById('settingBusinessName').value = currentUser.businessName || '';
+                document.getElementById('settingOwnerName').value = currentUser.ownerName || '';
+                document.getElementById('settingPhone').value = currentUser.phone || '';
+                document.getElementById('settingWebsite').value = currentUser.website || '';
+                document.getElementById('settingLicense').value = currentUser.licenseNumber || '';
+                document.getElementById('settingBrokerage').value = currentUser.brokerage || '';
+                document.getElementById('settingAreas').value = currentUser.areas?.join(', ') || '';
+                document.getElementById('settingCalendly').value = currentUser.calendlyLink || '';
+            }
+            
+            loadLeads();
+        }
+        
+        // Load leads
+        async function loadLeads() {
+            const token = localStorage.getItem('tlc_token');
+            if (!token) return;
+            
+            try {
+                const res = await fetch(API_URL + '/api/leads', {
+                    headers: { 'Authorization': 'Bearer ' + token }
                 });
                 
                 if (res.ok) {
                     const data = await res.json();
-                    if (data.response && data.response !== "I'm currently unavailable") {
-                        response.innerHTML = `<strong>🤖 AI Response:</strong><br><br>${data.response}`;
-                        return;
-                    }
+                    leads = data.leads || [];
+                    renderLeads();
+                    updateStats();
                 }
             } catch (e) {
-                console.log('API call failed, using smart fallback');
+                console.error('Error loading leads:', e);
             }
+        }
+        
+        function renderLeads() {
+            const tbody = document.getElementById('leadsTable');
+            const tbodyFull = document.getElementById('leadsTableFull');
             
-            // Fallback to smart responses
-            setTimeout(() => {
-                const services = document.getElementById('editServices').value || userData.services || 'our services';
-                const areas = document.getElementById('editAreas').value || userData.areas || 'your area';
-                const unique = document.getElementById('editUnique').value || userData.unique || 'quality service';
-                
-                const responses = {
-                    'service': `We offer ${services}. Would you like to learn more?`,
-                    'price': `We'd be happy to discuss pricing! It depends on your needs. Would you like a free consultation?`,
-                    'area': `We serve ${areas}. What area are you in?`,
-                    'hello': `Hi! Thanks for reaching out! How can we help you today?`,
-                    'book': `I'd be happy to help you schedule something! What works best for you - a call or an in-person meeting?`,
-                    'default': `Thanks for contacting us! We're here to help. What questions do you have about ${services}?`
-                };
-                
-                let reply = responses.default;
-                const lower = input.toLowerCase();
-                
-                if (lower.includes('service') || lower.includes('offer')) reply = responses.service;
-                else if (lower.includes('price') || lower.includes('cost') || lower.includes('how much')) reply = responses.price;
-                else if (lower.includes('area') || lower.includes('where')) reply = responses.area;
-                else if (lower.includes('hi') || lower.includes('hello')) reply = responses.hello;
-                else if (lower.includes('book') || lower.includes('schedule') || lower.includes('appointment')) reply = responses.book;
-                
-                response.innerHTML = `<strong>🤖 AI Response (Smart Fallback):</strong><br><br>${reply}`;
-            }, 1500);
-        }
-        
-        // Save settings
-        function saveSettings() {
-            userData.services = document.getElementById('editServices').value;
-            userData.areas = document.getElementById('editAreas').value;
-            userData.unique = document.getElementById('editUnique').value;
-            userData.website = document.getElementById('editWebsite').value;
-            userData.openingMessage = document.getElementById('editOpeningMessage').value;
-            userData.conversationGoal = document.getElementById('editConversationGoal').value;
-            localStorage.setItem('TheLeadChat_user', JSON.stringify(userData));
-            alert('Settings saved!');
-        }
-        
-        // Calendar functions
-        function connectCalendar(type) {
-            if (type === 'google') {
-                alert('Google Calendar connection coming soon! Email keoughmick768@gmail.com for setup.');
-            } else if (type === 'ghl') {
-                alert('GoHighLevel calendar connection coming soon! Email keoughmick768@gmail.com for setup.');
-            }
-        }
-        
-        function saveCalendly() {
-            const link = document.getElementById('calendlyLink').value;
-            if (!link) {
-                alert('Please enter your Calendly link');
+            if (leads.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-light); padding: 3rem;">No leads yet</td></tr>';
+                tbodyFull.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-light); padding: 3rem;">No leads yet</td></tr>';
                 return;
             }
             
-            userData.calendlyLink = link;
-            localStorage.setItem('TheLeadChat_user', JSON.stringify(userData));
+            const renderRow = (lead, cols = 5) => `
+                <tr>
+                    <td><strong>${lead.name}</strong></td>
+                    ${cols > 5 ? `<td>${lead.phone}${lead.email ? '<br>' + lead.email : ''}</td>` : ''}
+                    <td><span class="status-badge" style="text-transform: capitalize;">${lead.source}</span></td>
+                    <td><span class="status-badge ${lead.status}">${lead.status}</span></td>
+                    <td>${new Date(lead.createdAt).toLocaleDateString()}</td>
+                    ${cols > 5 ? `<td><button class="btn btn-ghost btn-sm">View</button></td>` : ''}
+                </tr>
+            `;
             
-            document.getElementById('calendarStatus').textContent = 'Connected';
-            document.getElementById('calendarStatus').style.background = 'rgba(16, 185, 129, 0.2)';
-            document.getElementById('calendlyLink').disabled = true;
-            alert('Calendly connected! AI will now offer to book appointments.');
+            tbody.innerHTML = leads.slice(0, 5).map(l => renderRow(l)).join('');
+            tbodyFull.innerHTML = leads.map(l => renderRow(l, 6)).join('');
         }
         
-        // Check if calendar already connected
-        if (userData.calendlyLink) {
-            document.getElementById('calendarStatus').textContent = 'Connected';
-            document.getElementById('calendarStatus').style.background = 'rgba(16, 185, 129, 0.2)';
-            document.getElementById('calendlyLink').value = userData.calendlyLink;
-            document.getElementById('calendlyLink').disabled = true;
+        function updateStats() {
+            document.getElementById('statTotalLeads').textContent = leads.length;
+            document.getElementById('statNewLeads').textContent = leads.filter(l => l.status === 'new').length;
+            document.getElementById('statQualified').textContent = leads.filter(l => ['qualified', 'appointment', 'showing'].includes(l.status)).length;
+            document.getElementById('statAppointments').textContent = leads.filter(l => l.status === 'appointment').length;
         }
         
-        // Allow Enter key to test
-        document.getElementById('testMessage').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') testAI();
+        // Login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const res = await fetch(API_URL + '/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    alert(data.error || 'Login failed');
+                    return;
+                }
+                
+                localStorage.setItem('tlc_token', data.token);
+                currentUser = data.user;
+                showDashboard();
+                loadLeads();
+            } catch (e) {
+                alert('Login failed. Please try again.');
+            }
         });
         
-        // =======================
-        // TRAIN AI FUNCTIONS
-        // =======================
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('tlc_token');
+            currentUser = null;
+            showAuth();
+        });
         
-        // Load Q&A knowledge base
-        async function loadKnowledgeBase() {
-            try {
-                const response = await fetch('/api/knowledge/qa', {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                const data = await response.json();
-                const qaList = document.getElementById('qaList');
-                document.getElementById('qaCount').textContent = data.qa.length;
-                
-                if (data.qa.length === 0) {
-                    qaList.innerHTML = '<p style="color: var(--text-muted);">No Q&A pairs yet. Add some above!</p>';
-                } else {
-                    qaList.innerHTML = data.qa.map(qa => `
-                        <div style="background: var(--bg-dark); padding: 16px; border-radius: 10px; display: flex; justify-content: space-between; align-items: start;">
-                            <div style="flex: 1;">
-                                <div style="color: var(--primary); font-weight: 500; margin-bottom: 4px;">Q: ${escapeHtml(qa.question)}</div>
-                                <div style="color: var(--text-muted); font-size: 0.9rem;">A: ${escapeHtml(qa.answer)}</div>
-                            </div>
-                            <button onclick="deleteQA('${qa._id || qa.id}')" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem;">🗑️</button>
-                        </div>
-                    `).join('');
-                }
-            } catch (error) {
-                console.error('Error loading knowledge base:', error);
-            }
+        // Add Lead Modal
+        function openModal(id) {
+            document.getElementById(id).showModal();
         }
         
-        // Load flagged questions
-        async function loadFlaggedQuestions() {
-            try {
-                const response = await fetch('/api/knowledge/flagged', {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                const data = await response.json();
-                const flaggedList = document.getElementById('flaggedList');
-                document.getElementById('flaggedCount').textContent = data.flagged.length;
-                
-                if (data.flagged.length === 0) {
-                    flaggedList.innerHTML = '<p style="color: var(--text-muted);">✅ No flagged questions - your AI is doing great!</p>';
-                } else {
-                    flaggedList.innerHTML = data.flagged.map(f => `
-                        <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); padding: 16px; border-radius: 10px;">
-                            <div style="color: #f59e0b; font-weight: 500; margin-bottom: 12px;">❓ ${escapeHtml(f.question)}</div>
-                            <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-                                <input type="text" id="answer-${f._id || f.id}" placeholder="Type the correct answer..." style="flex: 1; padding: 10px; background: var(--bg-dark); border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; color: white;">
-                            </div>
-                            <div style="display: flex; gap: 8px;">
-                                <button onclick="answerFlagged('${f._id || f.id}')" class="btn btn-sm">✅ Add to Knowledge Base</button>
-                                <button onclick="dismissFlagged('${f._id || f.id}')" style="background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted); padding: 8px 16px; border-radius: 8px; cursor: pointer;">Dismiss</button>
-                            </div>
-                        </div>
-                    `).join('');
-                }
-            } catch (error) {
-                console.error('Error loading flagged questions:', error);
-            }
+        function closeModal(id) {
+            document.getElementById(id).close();
         }
         
-        // Add new Q&A pair
-        async function addQA() {
-            const question = document.getElementById('qaQuestion').value.trim();
-            const answer = document.getElementById('qaAnswer').value.trim();
+        document.getElementById('addLeadBtn').addEventListener('click', () => openModal('addLeadModal'));
+        document.getElementById('addLeadBtn2').addEventListener('click', () => openModal('addLeadModal'));
+        
+        // Add Lead Form
+        document.getElementById('addLeadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
             
-            if (!question || !answer) {
-                alert('Please enter both a question and an answer');
-                return;
-            }
+            const token = localStorage.getItem('tlc_token');
+            if (!token) return;
+            
+            const lead = {
+                name: document.getElementById('leadName').value,
+                phone: document.getElementById('leadPhone').value,
+                email: document.getElementById('leadEmail').value,
+                budget: document.getElementById('leadBudget').value,
+                timeline: document.getElementById('leadTimeline').value,
+                notes: document.getElementById('leadNotes').value,
+                source: 'manual'
+            };
             
             try {
-                const response = await fetch('/api/knowledge/qa', {
+                const res = await fetch(API_URL + '/api/leads', {
                     method: 'POST',
-                    headers: {
+                    headers: { 
                         'Content-Type': 'application/json',
                         'Authorization': 'Bearer ' + token
                     },
-                    body: JSON.stringify({ question, answer })
+                    body: JSON.stringify(lead)
                 });
                 
-                const data = await response.json();
-                if (data.success) {
-                    document.getElementById('qaQuestion').value = '';
-                    document.getElementById('qaAnswer').value = '';
-                    loadKnowledgeBase();
-                    alert('Q&A added to your knowledge base!');
+                if (res.ok) {
+                    closeModal('addLeadModal');
+                    document.getElementById('addLeadForm').reset();
+                    loadLeads();
                 } else {
-                    alert('Error: ' + data.error);
+                    alert('Failed to add lead');
                 }
-            } catch (error) {
-                console.error('Error adding Q&A:', error);
-                alert('Failed to add Q&A');
+            } catch (e) {
+                alert('Error adding lead');
             }
-        }
+        });
         
-        // Delete Q&A pair
-        async function deleteQA(id) {
-            if (!confirm('Delete this Q&A pair?')) return;
+        // Settings Form
+        document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const token = localStorage.getItem('tlc_token');
+            if (!token) return;
+            
+            const data = {
+                businessName: document.getElementById('settingBusinessName').value,
+                ownerName: document.getElementById('settingOwnerName').value,
+                phone: document.getElementById('settingPhone').value,
+                website: document.getElementById('settingWebsite').value,
+                licenseNumber: document.getElementById('settingLicense').value,
+                brokerage: document.getElementById('settingBrokerage').value,
+                areas: document.getElementById('settingAreas').value.split(',').map(s => s.trim()).filter(s => s),
+                calendlyLink: document.getElementById('settingCalendly').value
+            };
             
             try {
-                const response = await fetch('/api/knowledge/qa/' + id, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                
-                const data = await response.json();
-                if (data.success) {
-                    loadKnowledgeBase();
-                }
-            } catch (error) {
-                console.error('Error deleting Q&A:', error);
-            }
-        }
-        
-        // Answer a flagged question
-        async function answerFlagged(id) {
-            const answer = document.getElementById('answer-' + id).value.trim();
-            
-            if (!answer) {
-                alert('Please enter an answer');
-                return;
-            }
-            
-            try {
-                const response = await fetch('/api/knowledge/flagged/' + id + '/answer', {
-                    method: 'POST',
-                    headers: {
+                const res = await fetch(API_URL + '/api/user/profile', {
+                    method: 'PUT',
+                    headers: { 
                         'Content-Type': 'application/json',
                         'Authorization': 'Bearer ' + token
                     },
-                    body: JSON.stringify({ answer })
+                    body: JSON.stringify(data)
                 });
                 
-                const data = await response.json();
-                if (data.success) {
-                    loadFlaggedQuestions();
-                    loadKnowledgeBase();
-                    alert('Great! This question will now be answered correctly.');
+                if (res.ok) {
+                    alert('Settings saved!');
                 } else {
-                    alert('Error: ' + data.error);
+                    alert('Failed to save settings');
                 }
-            } catch (error) {
-                console.error('Error answering flagged:', error);
-                alert('Failed to save answer');
+            } catch (e) {
+                alert('Error saving settings');
             }
-        }
+        });
         
-        // Dismiss a flagged question
-        async function dismissFlagged(id) {
-            if (!confirm('Dismiss this flagged question without adding an answer?')) return;
-            
-            try {
-                const response = await fetch('/api/knowledge/flagged/' + id, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
+        // Navigation
+        document.querySelectorAll('.nav-link[data-page]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const page = link.dataset.page;
                 
-                const data = await response.json();
-                if (data.success) {
-                    loadFlaggedQuestions();
-                }
-            } catch (error) {
-                console.error('Error dismissing flagged:', error);
-            }
-        }
+                // Update active nav
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+                
+                // Show page
+                document.querySelectorAll('.page-content').forEach(p => p.style.display = 'none');
+                document.getElementById('page-' + page).style.display = 'block';
+            });
+        });
         
-        // Utility: escape HTML
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-        
-        // Load Train AI data on page load
-        loadKnowledgeBase();
-        loadFlaggedQuestions();
+        // Initialize
+        checkAuth();
     </script>
 </body>
 </html>
-
